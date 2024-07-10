@@ -1,0 +1,90 @@
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 80px;
+    padding: 0 50px;
+    width: 100%;
+}
+
+header>div:first-child {
+    width: 250px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+header>div:first-child img {
+    width: 100%;
+}
+
+// Navegação
+header>nav:first-of-type>ul {
+    display: flex;
+    list-style: none;
+    gap: 30px;
+    color: #636363;
+    text-decoration: none;
+}
+
+header>nav:first-of-type>ul>li>a {
+    color: #636363;
+    font-size: 20px;
+    text-decoration: none;
+    position: relative;
+}
+
+// Ícones
+header>nav:last-of-type>ul {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    gap: 64px;
+}
+
+header>nav:last-of-type>ul>li>a {
+    position: relative;
+}
+
+header>nav:last-of-type>ul>li>a>img {
+    width: 32px;
+    height: 32px;
+    transition: .5s ease;
+}
+
+header>nav:last-of-type>ul>li>a>img:hover {
+    transform: scale(1.1);
+}
+
+// Efeito hover com linha surgindo em baixo dos ícones de navegação
+header>nav>ul>li>a::after {
+    content: "";
+    background: #0672CB;
+    position: absolute;
+    bottom: -4px;
+    width: 0;
+    height: 4px;
+    left: 0;
+    transition: 0.5s;
+}
+
+header>nav>ul>li>a:hover::after {
+    width: 100%;
+}
+
+// classe para identificar a página atual
+header>nav:first-of-type>ul>li>a.actualPageNav {
+    color: #0672CB;
+    font-weight: 600;
+}
+
+header .actualPageNav::after {
+    content: "";
+    background: #0672CB;
+    position: absolute;
+    bottom: -4px;
+    width: 100%;
+    height: 4px;
+    left: 0;
+    transition: 0.5s;
+}

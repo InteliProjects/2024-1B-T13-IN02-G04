@@ -1,0 +1,160 @@
+// container do manual
+div.manualContainer {
+    width: 320px;
+    height: 370px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #dadada;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: .5s ease;
+    position: relative;
+}
+
+div.manualContainer:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 10px #00000077;
+}
+
+// Indicativo de satus de atividade
+div.manualContainer div.statusConcluded,
+div.manualContainer div.statusPending {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    border: 3px solid #FFF;
+    top: 8px;
+    left: 8px;
+    border-radius: 50%;
+    box-shadow: 0 0 5px #00000044;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+// Imagem que indica que o manual foi concluído
+div.manualContainer div.statusConcluded img {
+    width: 21px;
+    height: 15px;
+}
+
+// Imagem que indica que o manual está pendente
+div.manualContainer div.statusPending img {
+    width: 19px;
+    height: 4px;
+}
+
+div.manualContainer div.statusConcluded {
+    background-color: #7AA809; // Green 400
+}
+
+div.manualContainer div.statusPending {
+    background-color: #F5CD6F; // Yellow 200
+}
+
+// Indica se o manual está favoritado
+div.manualContainer img.favoritedManual {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    filter: drop-shadow(0 0 5px #0000009d);
+}
+
+// imagem do manual
+div.manualContainer div.imageContainer {
+    height: 240px;
+}
+
+div.manualContainer div.imageContainer>img {
+    width: 100%;
+}
+
+// backgrounds dos tipos de hardwares
+// acessórios background:
+div.manualContainer .accessoryBackground {
+    background: linear-gradient(to bottom left, #CEF5FD, #93C6F0);
+}
+
+// monitores background:
+div.manualContainer .monitorBackground {
+    background: linear-gradient(to bottom left, #B59BE2, #D3B3E6);
+}
+
+// notebooks background:
+div.manualContainer .laptopBackground {
+    background: linear-gradient(to bottom left, #A8D1C0, #C7E4D9);
+}
+
+// servidores background:
+div.manualContainer .serverBackground {
+    background: linear-gradient(to bottom left, #DCDCDC, #F0F0F0);
+}
+
+// armazenamentos background:
+div.manualContainer .storageBackground {
+    background: linear-gradient(to bottom left, #F2E1A4, #FFF0CC);
+}
+
+// workstations background:
+div.manualContainer .workstationBackground {
+    background: linear-gradient(to bottom left, #FFBA88, #FFD9B3);
+}
+
+// desktops background:
+div.manualContainer .desktopBackground {
+    background: linear-gradient(to bottom left, #93C6F0, #B3D9F5);
+}
+
+// Conteúdo do container do manual
+div.manualContainer>div.contentContainer {
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 12px;
+    flex: 1;
+}
+
+div.manualContainer>div.contentContainer>div {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+div.manualContainer>div.contentContainer>div>div.materialTypesIcons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+div.manualContainer>div.contentContainer>div>div.materialTypesIcons>img {
+    width: 20px;
+    height: 20px;
+}
+
+// identificador do tipo de hardware
+div.manualContainer>div.contentContainer span {
+    height: 30px;
+    background-color: #111;
+    color: #fff;
+    font-size: 14px;
+    font-family: "Roboto", sans-serif;
+    padding: 4px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+div.manualContainer>div.contentContainer>h4 {
+    font-size: 24px;
+    font-weight: 400;
+    margin-top: 4px;
+}
+
+div.manualContainer>div.contentContainer>p {
+    font-size: 16px;
+    color: #707070;
+}

@@ -1,0 +1,211 @@
+<main id="manual">
+  <h1>Manual</h1>
+  <section id="manualView">
+    <div class="manualTitleContainer">
+      <h2><%= manual.title %></h2>
+      <% if (manual.isFavorited) { %>
+      <button id="favoriteBtn" class="favorited">
+        <span id="favoriteText">Favoritado</span>
+        <img
+          id="favoriteIcon"
+          src="/images/icons/heart-filled.svg"
+          alt="Favoritar"
+        />
+      </button>
+      <% } else {%>
+      <button id="favoriteBtn">
+        <span id="favoriteText">Favoritar</span>
+        <img id="favoriteIcon" src="/images/icons/heart.svg" alt="Favoritar" />
+      </button>
+      <% } %>
+    </div>
+
+    <div class="manualTextDescription">
+      <p><%= manual.description %></p>
+    </div>
+
+    <!-- Card e materiais -->
+    <div class="manualTopSection">
+      <div class="manualCardContainer">
+        <div class="imageContainer <%= manual.hardwareType %>Background">
+          <img
+            src="/images/productsTypes/<%= manual.hardwareType %>.png"
+            alt="<%= manual.title %>"
+            onerror="this.onerror=null;this.src='/images/productsTypes/empty.png';"
+          />
+        </div>
+        <div class="contentContainer">
+          <div class="hardwareType">
+            <span
+              ><%= manual.hardwareType === "laptop" ? "Notebook" :
+              manual.hardwareType === "workstation" ? "Workstation" :
+              manual.hardwareType === "storage" ? "Armazenamento" :
+              manual.hardwareType === "server" ? "Servidor" :
+              manual.hardwareType === "desktop" ? "Computador" :
+              manual.hardwareType === "accessory" ? "Accessório" :
+              manual.hardwareType === "monitor" ? "Monitor" :
+              manual.hardwareType === "other" ? "Outro" : manual.hardwareType
+              %></span
+            >
+            <div class="materialTypesIcons">
+              <!-- Aqui ficarão as imagens que indicam os tipos de materiais associados a este manual -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de links dos materiais e imagem de apoio -->
+      <div class="materiaisLinks">
+        <h3>Materiais</h3>
+        <ul id="materialLinksList">
+          <!-- Os links devem ser adicionados dinamicamente aqui -->
+        </ul>
+      </div>
+    </div>
+    <div class="manualButtons">
+      <button id="backBtn">Voltar</button>
+      <button id="doneBtn">Concluir</button>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function checkAuthentication() {
+        // Função para proteger rota
+        if (!sessionStorage.length) window.location.href = "/entrar"; // Redirecionar para a tela de login
+      }
+
+      checkAuthentication();
+
+      function renderMaterialLinks(materials) {
+      const materialLinksList = document.getElementById("materialLinksList");
+      const materialTypes = {
+        img: "à imagem",
+        "3d": "ao modelo 3D",
+        vid: "ao vídeo",
+        pdf: "ao documento PDF",
+      };
+
+      materials.forEach((material) => {
+        const listItem = document.createElement("li");
+        const link = document.createElement("a");
+        link.href = material.link;  // Corrige o href para o link correto
+        link.target = "_blank";  // Abre o link em uma nova aba
+        link.textContent = `Acesso ${materialTypes[material.type]}: ${material.link}`;
+
+        const icon = document.createElement("img");
+        icon.src = "/images/icons/share.svg";
+        icon.alt = "Ícone de compartilhamento";
+        icon.style.marginLeft = "10px";
+        icon.style.width = "13px"; // Ajusta a largura do ícone
+        icon.style.height = "13px"; // Ajusta a altura do ícone
+
+        listItem.appendChild(link);
+        listItem.appendChild(icon);
+        materialLinksList.appendChild(listItem);
+      });
+    }
+
+    function renderMaterialTypeIcons(materials) {
+      const materialTypesIcons = document.querySelector("div.materialTypesIcons");
+      const iconMap = {
+        img: "/images/icons/img.svg",
+        "3d": "/images/icons/3D.svg",
+        stp: "/images/icons/3D.svg",
+        vid: "/images/icons/vid.svg",
+        mp4: "/images/icons/vid.svg",
+        mkv: "/images/icons/vid.svg",
+        jpg: "/images/icons/img.svg",
+        png: "/images/icons/img.svg",
+        pdf: "/images/icons/pdf.svg"
+      };
+
+      const uniqueTypes = [...new Set(materials.map(material => material.type))];
+
+      uniqueTypes.forEach(type => {
+        if (iconMap[type]) {
+          const icon = document.createElement("img");
+          icon.src = iconMap[type];
+          icon.alt = `Indicador de material ${type}`;
+          materialTypesIcons.appendChild(icon);
+        }
+      });
+    }
+
+    // Dados do manual enviados do controller
+    const manual = <%- JSON.stringify(manual) %>;
+
+    // Chama a função para renderizar os links dos materiais
+    renderMaterialLinks(manual.materials);
+    renderMaterialTypeIcons(manual.materials);
+
+      document
+        .getElementById("favoriteBtn")
+        .addEventListener("click", async () => {
+          const favoriteBtn = document.getElementById("favoriteBtn");
+          const favoriteIcon = document.getElementById("favoriteIcon");
+          const favoriteText = document.getElementById("favoriteText");
+
+          try {
+            const response = await fetch("/api/manual/favorite", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                idEmployee: sessionStorage.id,
+                idManual: "<%= manual.id %>",
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error("Erro ao favoritar o manual!");
+            }
+
+            const data = await response.json();
+          } catch (error) {
+            console.error("Erro:", error);
+          }
+
+          if (favoriteBtn.classList.contains("favorited")) {
+            favoriteBtn.classList.remove("favorited");
+            favoriteIcon.src = "/images/icons/heart.svg"; // Ícone não preenchido
+            favoriteText.textContent = "Favoritar";
+          } else {
+            favoriteBtn.classList.add("favorited");
+            favoriteIcon.src = "/images/icons/heart-filled.svg"; // Ícone preenchido
+            favoriteText.textContent = "Favoritado";
+          }
+        });
+
+      document.getElementById("doneBtn").addEventListener("click", async () => {
+        try {
+          const response = await fetch("/api/manual/conclude", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              idEmployee: sessionStorage.id,
+              idManual: "<%= manual.id %>",
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Erro ao concluir o manual!");
+          }
+
+          const data = await response.json();
+        } catch (error) {
+          console.error("Erro:", error);
+        }
+
+        history.back();
+      });
+
+      document.getElementById("backBtn").addEventListener("click", () => {
+        history.back();
+      });
+    });
+  </script>
+</main>

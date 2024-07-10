@@ -1,0 +1,404 @@
+<main id="profile">
+  <h1>Perfil</h1>
+
+  <form id="actualData">
+    <!-- Nome -->
+    <div>
+      <label for="name">Nome</label>
+      <div class="inputAndIcon">
+        <img
+          src="/images/icons/user.svg"
+          alt="Imagem para indicar o formulário é de nome"
+        />
+        <input type="text" id="name" title="Nome atual" name="name" readonly />
+      </div>
+    </div>
+
+    <!-- E-mail -->
+    <div>
+      <label for="email">E-mail</label>
+      <div class="inputAndIcon">
+        <img
+          src="/images/icons/mail.svg"
+          alt="Imagem para indicar o formulário é de e-mail"
+        />
+        <input
+          type="email"
+          id="email"
+          title="E-mail atual"
+          name="email"
+          readonly
+        />
+      </div>
+    </div>
+
+    <!-- Mostrar a senha atual -->
+    <div>
+      <div>
+        <label for="password">Senha Atual</label>
+        <button
+          type="button"
+          aria-label="Exibir ou ocultar senha"
+          aria-pressed="false"
+          id="togglePassword1"
+        >
+          Mostrar
+        </button>
+      </div>
+      <div class="inputAndIcon">
+        <img
+          src="/images/icons/key.svg"
+          alt="Imagem para indicar o formulário é de senha"
+        />
+        <input
+          type="password"
+          id="password"
+          name="password"
+          readonly
+          title="Senha atual"
+        />
+      </div>
+    </div>
+
+    <div>
+      <button type="button" id="alterPassBtn">Alterar Senha</button>
+      <button type="button" id="logoutBtn">Sair da Conta</button>
+    </div>
+  </form>
+
+  <!-- Formulário para alterar senha: -->
+  <div class="modalBackground">
+    <form id="newPasswordForm">
+      <!-- Botão para fechar o formulário -->
+      <button type="button">
+        <img src="/images/icons/close.svg" alt="Ícone para fechar formulário" />
+      </button>
+
+      <h2>Alterar senha</h2>
+
+      <div>
+        <div>
+          <label for="newPass">Nova Senha</label>
+          <button
+            type="button"
+            aria-label="Exibir ou ocultar senha"
+            aria-pressed="false"
+            id="togglePassword2"
+          >
+            Mostrar
+          </button>
+        </div>
+        <div class="inputAndIcon">
+          <img
+            src="/images/icons/key.svg"
+            alt="Imagem para indicar o formulário é de senha"
+          />
+          <input
+            type="password"
+            id="newPass"
+            name="newPass"
+            placeholder="Digite sua nova senha"
+            minlength="8"
+            maxlength="50"
+            required
+            aria-describedby="newPassHelp"
+            autocomplete="new-password"
+          />
+        </div>
+        <p id="newPassHelp">
+          Mínimo 8 caracteres e incluir pelo menos uma letra, um número e um
+          símbolo.
+        </p>
+      </div>
+
+      <div>
+        <div>
+          <label for="newPassConfirm">Confirmar Nova Senha</label>
+          <button
+            type="button"
+            aria-label="Exibir ou ocultar senha"
+            aria-pressed="false"
+            id="togglePassword3"
+          >
+            Mostrar
+          </button>
+        </div>
+        <div class="inputAndIcon">
+          <img
+            src="/images/icons/key.svg"
+            alt="Imagem para indicar o formulário é de senha"
+          />
+          <input
+            type="password"
+            id="newPassConfirm"
+            name="newPassConfirm"
+            placeholder="Confirme sua nova senha"
+            minlength="8"
+            maxlength="50"
+            required
+            aria-describedby="newPassConfirmHelp"
+            autocomplete="new-password"
+          />
+        </div>
+        <p id="newPassConfirmHelp">
+          Mínimo 8 caracteres e incluir pelo menos uma letra, um número e um
+          símbolo.
+        </p>
+      </div>
+      <button type="submit">Salvar Alterações</button>
+    </form>
+  </div>
+
+  <div id="actionResult" class="success">
+    <img
+      src="/images/icons/check.svg"
+      alt="Ícone que indica que indica o resultado da ação."
+    />
+    <p>Senha Alterada!</p>
+    <!-- Receberá o resultado da ação -->
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function checkAuthentication() {
+        if (!sessionStorage.length) window.location.href = "/entrar"; // Redirecionar para a tela de login
+      }
+
+      // Testa se o usuário está logado
+      checkAuthentication();
+
+      // Função para ajustar a altura do elemento main
+      function changeMainHeight() {
+        var windowHeight = window.innerHeight; // Altura da janela do navegador
+        var footerAndHeaderHeight = 160; // Altura do footer
+        var mainHeight = windowHeight - footerAndHeaderHeight; // Calcula a altura disponível para o main
+
+        if (windowHeight <= 800) return;
+
+        // Define a altura do main
+        document.querySelector("main#profile").style.height = mainHeight + "px";
+      }
+
+      // Chama a função quando a página é carregada e redimensionada
+      window.addEventListener("load", changeMainHeight);
+      window.addEventListener("resize", changeMainHeight);
+
+      // Função para alternar a visibilidade da senha
+      function togglePasswordVisibility(buttonId, inputId) {
+        const button = document.getElementById(buttonId);
+        const input = document.getElementById(inputId);
+        button.addEventListener("click", () => {
+          const isPasswordVisible = input.type === "text";
+          input.type = isPasswordVisible ? "password" : "text";
+          button.textContent = isPasswordVisible ? "Mostrar" : "Ocultar";
+        });
+      }
+
+      // Aplicar a função para cada par de botão e campo de senha
+      togglePasswordVisibility("togglePassword1", "password");
+      togglePasswordVisibility("togglePassword2", "newPass");
+      togglePasswordVisibility("togglePassword3", "newPassConfirm");
+
+      // Função para o botão de alterar senha abrir o modal com o formulário de alteração de senha:
+      document.getElementById("alterPassBtn").addEventListener("click", () => {
+        document.querySelector(
+          "main#profile > div.modalBackground"
+        ).style.display = "flex";
+      });
+
+      document
+        .querySelector("main#profile > div.modalBackground")
+        .addEventListener("click", () => {
+          document.querySelector(
+            "main#profile > div.modalBackground"
+          ).style.display = "none";
+        });
+
+      document
+        .querySelector(
+          "main#profile > div.modalBackground > form#newPasswordForm"
+        )
+        .addEventListener("click", (event) => {
+          event.stopPropagation();
+        });
+
+      document
+        .querySelector(
+          "main#profile>div.modalBackground>form#newPasswordForm>button:first-child"
+        )
+        .addEventListener("click", () => {
+          document.querySelector(
+            "main#profile > div.modalBackground"
+          ).style.display = "none";
+        });
+
+      // Função para buscar dados do perfil do usuário
+      async function fetchProfile() {
+        try {
+          const employeeId = {
+            employeeId: sessionStorage.id,
+          };
+
+          const response = await fetch("api/profile", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(employeeId),
+          });
+          const data = await response.json();
+
+          if (response.ok) {
+            document.getElementById("name").value = data.name;
+            document.getElementById("email").value = data.email;
+            document.getElementById("password").value = data.password; // ou outra forma de mascarar a senha
+          } else {
+            console.error("Erro ao buscar dados do perfil", data);
+          }
+        } catch (error) {
+          console.error("Erro ao buscar dados do perfil", error);
+        }
+      }
+
+      // Chama a função para buscar os dados do perfil ao carregar a página
+      fetchProfile();
+
+      // Função para validar a senha
+      function passValidate() {
+        const newPass = document.getElementById("newPass").value;
+        const passConfirm = document.getElementById("newPassConfirm").value;
+        const helperText = document.getElementById("newPassConfirmHelp");
+
+        // Verifica se as senhas são iguais
+        const equalPass = newPass === passConfirm;
+        // Verifica se há espaços duplos ou espaços no início ou no final
+        const noEmpty = !/^\s|\s$|\s\s+/.test(newPass);
+
+        // Atualiza o texto de ajuda em tempo real
+        if (equalPass && noEmpty) {
+          helperText.textContent = "As senhas conferem!";
+          helperText.className = "textSuccess"; // Adicione um estilo para texto de sucesso
+        } else {
+          helperText.textContent =
+            "As senhas não conferem ou contêm espaços inválidos.";
+          helperText.className = "textDanger"; // Adicione um estilo para texto de erro
+        }
+
+        // Retorna verdadeiro se as validações passarem
+        return equalPass && noEmpty;
+      }
+
+      // Adiciona evento de input para validar em tempo real
+      document
+        .getElementById("newPass")
+        .addEventListener("input", passValidate);
+      document
+        .getElementById("newPassConfirm")
+        .addEventListener("input", passValidate);
+
+      // Seleciona o formulário de alteração de senha e adiciona um listner para executar a chamada à API
+      document
+        .querySelector("main#profile form#newPasswordForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          if (!passValidate()) {
+            // coloca um sublinhado no helpertext para informar ao usuário o fracasso da operação
+            document.getElementById("newPassConfirmHelp").style.textDecoration =
+              "underline";
+
+            // Se a validação falhar, não prossegue com o envio
+            return;
+          }
+
+          // Remove o efeito de sublinhado caso so usuário tenha errado anteriormente
+          document.getElementById("newPassConfirmHelp").style.textDecoration =
+            "none";
+
+          // Recebe os dados do formulário
+          const form = event.target;
+          const formData = new FormData(form);
+          const data = Object.fromEntries(formData.entries());
+
+          // Cria um objeto com a confirmação da nova senha e o ID do usuário logado
+          const newPassConfirm = {
+            employeeId: sessionStorage.id,
+            newPassConfirm: data.newPassConfirm,
+          };
+
+          // Seleciona os elementos para alterá-los e mostrar ao usuário que a operação foi um sucesso ou um fracasso.
+          const actionResult = document.getElementById("actionResult");
+          const resultImg = actionResult.querySelector("img");
+          const resultText = actionResult.querySelector("p");
+
+          try {
+            // Envia à API a nova senha e o usuário logado
+            const response = await fetch("api/profile", {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(newPassConfirm),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              // Se a resposta foi recebida com sucesso:
+              // Alterar a mensagem e a aparência do actionResult
+              actionResult.className = "success";
+              resultImg.src = "/images/icons/check.svg";
+              resultText.textContent = "Senha Alterada!";
+              actionResult.style.display = "flex";
+
+              setTimeout(() => {
+                // Esconde após um tempo a mensagem de sucesso
+                actionResult.style.display = "none";
+              }, 5000);
+
+              // Busca novamente os dados do usuário para atualizar a página de perfil com a nova senha:
+              fetchProfile();
+            } else {
+              // Se houve algum erro:
+              console.error("Erro ao atualizar senha", result);
+
+              // Estiliza o pop-up para o caso de erro
+              actionResult.className = "failed";
+              resultImg.src = "/images/icons/failed.svg";
+              resultText.textContent = "Erro, senha não atualizada";
+              actionResult.style.display = "flex";
+
+              setTimeout(() => {
+                actionResult.style.display = "none";
+              }, 5000);
+            }
+          } catch (error) {
+            // Em caso de falha do envio ao servidor:
+            console.error("Erro ao atualizar senha", error);
+
+            actionResult.className = "failed";
+            resultImg.src = "/images/icons/failed.svg";
+            resultText.textContent = "Erro, senha não atualizada";
+            actionResult.style.display = "flex";
+
+            setTimeout(() => {
+              actionResult.style.display = "none";
+            }, 5000);
+          }
+
+          // Para todos os casos, esconde o modal de alteração de senha
+          document.querySelector(
+            "main#profile > div.modalBackground"
+          ).style.display = "none";
+        });
+
+      // Função para logout
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", function () {
+          sessionStorage.clear();
+          window.location.href = "/entrar";
+        });
+    });
+  </script>
+</main>

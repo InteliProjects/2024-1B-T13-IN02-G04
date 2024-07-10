@@ -1,0 +1,109 @@
+main#homepage {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 36px;
+}
+
+main#homepage>h1 {
+    margin-top: 20px;
+    margin-left: 60px;
+    font-size: 40px;
+    letter-spacing: 1.5px;
+}
+
+// Seções
+main#homepage>section {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 28px 60px;
+    position: relative;
+    gap: 12px;
+}
+
+// ------------------------------------------------ ESTILIZAÇÕES GERAIS (carrossel) ------------------------------------------------
+// para posicionar os botões
+// Botões para passar carrossel:
+div.relativeToBtn {
+    position: relative;
+    width: 100%;
+}
+
+main#homepage img.backButton,
+main#homepage img.nextButton {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    width: 30px;
+    height: 50px;
+    transition: .25s;
+    display: none;
+}
+
+main#homepage img.backButton:hover,
+main#homepage img.nextButton:hover {
+    filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.505));
+}
+
+main#homepage img.backButton {
+    left: -40px;
+}
+
+main#homepage img.nextButton {
+    right: -40px;
+}
+
+// carrossel
+div.carroussel {
+    width: 100%;
+    height: 385px;
+    padding: 5px 10px;
+    display: flex;
+    align-self: center;
+    overflow-x: auto;
+    overflow-y: hidden;
+    gap: 20px;
+    position: relative;
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none;  /* For Internet Explorer and Edge */
+}
+
+div.carroussel::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Opera */
+}
+
+div.carroussel>h4 {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    letter-spacing: 2.5px;
+    font-weight: 300;
+    color: #B6B6B6;
+}
+
+// ------------------------------------------------  SEÇÃO DE PENDÊNCIAS ------------------------------------------------
+main#homepage>section#tasks {
+    background-color: #f0f0f0;
+}
+
+main#homepage>section#tasks>div:first-child>h3 {
+    font-size: 24px;
+}
+
+main#homepage>section#tasks>a#pedenciesButton {
+    align-self: flex-end;
+    background-color: #0672CB;
+    color: #fff;
+    width: 180px;
+    height: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+}

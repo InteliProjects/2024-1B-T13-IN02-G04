@@ -1,0 +1,204 @@
+main#manual {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+}
+
+main#manual h1 {
+    padding: 28px 60px 0px;
+}
+
+main#manual section#manualView {
+    background-color: #f0f0f0;
+    padding: 28px 120px 28px;
+}
+
+main#manual .manualButtons {
+    padding-top: 40px;
+    display: flex;
+    justify-content: space-between;
+}
+
+main#manual button#backBtn {
+    border: 1.5px solid #0672CB;
+    color: #0672CB;
+    width: 150px;
+    height: 50px;
+    transition: .25s ease;
+}
+
+main#manual button#doneBtn {
+    background-color: #0672CB;
+    color: white;
+    width: 150px;
+    height: 50px;
+    transition: .25s ease;
+}
+
+main#manual button#backBtn:hover,
+main#manual button#doneBtn:hover {
+    box-shadow: 0 0 5px #0672cb86;
+    transform: scaleX(1.025)
+}
+
+// Seções
+main#manual div.manualCardContainer {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: space-between;
+    position: relative;
+}
+
+// Estilos para o título e botão de favoritar
+main#manual div.manualTitleContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+main#manual div.manualTextDescription>p {
+    padding-bottom: 20px;
+}
+
+main#manual .manualTitleContainer button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: .25s ease;
+}
+
+main#manual .manualTitleContainer button img {
+    transition: .25s ease;
+}
+
+main#manual .manualTitleContainer button:hover img {
+    transform: scale(1.06);
+}
+
+main#manual .manualTitleContainer img {
+    margin-left: 10px;
+}
+
+main#manual .manualTitleContainer span {
+    font-size: 16px;
+    color: #000;
+}
+
+// Estilos para a seção superior
+main#manual .manualTopSection {
+    display: flex;
+}
+
+main#manual div.manualCardContainer {
+    flex: 1;
+    max-width: 360px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #dadada;
+    border-radius: 4px;
+    transition: .5s ease;
+}
+
+main#manual .imageContainer {
+    height: 280px;
+}
+
+main#manual .imageContainer>img {
+    width: 100%;
+}
+
+main#manual>section#manualView>div.manualTopSection>div.materiaisLinks {
+    padding: 0px 20px 20px;
+}
+
+main#manual>section#manualView>div.manualTopSection>div.materiaisLinks>#materialLinksList li {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    list-style-type: none;
+}
+
+main#manual .materialLinks a {
+    text-decoration: none;
+    color: #007bff;
+    flex-grow: 1;
+}
+
+main#manual .materialLinks img {
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+}
+
+main#manual .materialImage {
+    flex: 1;
+    max-width: 50%;
+}
+
+main#manual .materialImage img {
+    width: 100%;
+    border: 1px solid #dadada;
+    border-radius: 4px;
+}
+
+// Conteúdo do container do manual
+main#manual div.manualCardContainer>div.contentContainer {
+    background-color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 12px;
+    flex: 1;
+    width: 100%;
+    height: 100%;
+}
+
+main#manual div.manualCardContainer>div.contentContainer>div.hardwareType {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+main#manual div.manualCardContainer>div.contentContainer>div.hardwareType>span {
+    width: 110px;
+    height: 30px;
+    background-color: #111;
+    color: #fff;
+    font-size: 14px;
+    font-family: "Roboto", sans-serif;
+    padding: 3px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+main#manual div.manualCardContainer>div.contentContainer>div>div.materialTypesIcons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+main#manual div.manualCardContainer>div.contentContainer>div>div.materialTypesIcons>img {
+    width: 20px;
+    height: 20px;
+    align-content: flex-end;
+}
+
+main#manual div.manualCardContainer>div.contentContainer>h4 {
+    font-size: 24px;
+    font-weight: 400;
+    padding: 3px;
+}
+
+main#manual .materialsLinksList {
+    width: 100%;
+}
+

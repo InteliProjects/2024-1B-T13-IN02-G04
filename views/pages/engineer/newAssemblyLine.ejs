@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exemplo de Modal</title>
+    <!-- Incluir CSS do Select2 -->
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- Incluir jQuery (requerido pelo Select2) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Incluir JS do Select2 -->
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+</head>
+
+<body>
+    <main id="assemblyLine">
+        <section id="inputAssemblyLine">
+            <h1>Criar linhas de montagem</h1>
+            <form id="assemblyLineForm">
+                <div id="display-container">
+                    <div class="left">
+                        <div class="input-container">
+                            <label for="name" class="title-label">Nome da linha</label> <br>
+                            <p class="label-description">Adicione o nome da linha</p>
+                            <input type="text" name="name" id="name">
+                        </div>
+
+                        <div class="input-container">
+                            <label for="name" class="title-label">Descrição</label> <br>
+                            <p class="label-description">Adicione uma descrição a nova linha</p>
+                            <textarea name="description" id="textarea-description"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="right">
+                        <div class="input-container">
+                            <label for="employee" class="title-label">Funcionários</label> <br>
+                            <p class="label-description">Adicione funcionários a nova linha</p>
+                            <select id="employees" name="employeesId" multiple="multiple">
+                                <% employees.forEach(function(employee) { %>
+                                    <option value="<%= employee.id %>">
+                                        <%= employee.name %>
+                                    </option>
+                                    <% }); %>
+                            </select>
+                        </div>
+
+                        <div class="input-container">
+                            <label for="name" class="title-label">Manuais</label> <br>
+                            <p class="label-description">Adicione manuais a nova linha</p>
+                            <select id="manuals" name="manualsId" multiple="multiple">
+                                <% manuals.forEach(function(manual) { %>
+                                    <option value="<%= manual.id %>">
+                                        <%= manual.title %>
+                                    </option>
+                                    <% }); %>
+                            </select>
+
+                            <div class="div-button">
+                                <button id="buttonCancel">Cancelar</button>
+                                <button id="buttonSave" type="submit">Salvar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+
+
+        </section>
+
+        <!-- Modal -->
+        <div id="modal-confirmation" class="modal">
+            <div class="modal-content">
+                <div>
+                    <span class="close-btn">&times;</span>
+                    <h1 id="modal-title">Atenção!</h1>
+                    <h4>Deseja realmente cancelar a operação?</h4>
+                    <p>O progresso atual não será restaurado</p>
+                </div>
+                <div class="botoesSimNao">
+                    <button class="noButton" id="noButton">Não</button>
+                    <button class="yesButton" id="yesButton">Sim</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('noButton').onclick = function () {
+            event.preventDefault();
+            modal.style.display = "none";
+        }
+        document.getElementById('yesButton').onclick = function () {
+            window.location.href = '/engenheiro/linhas';
+        }
+
+        // Obtenha o modal
+        var modal = document.getElementById("modal-confirmation");
+
+        // Obtenha o botão que abre o modal
+        var btn = document.getElementById("buttonCancel");
+
+        // Obtenha o elemento <span> que fecha o modal
+        var span = document.getElementsByClassName("close-btn")[0];
+
+        // Quando o usuário clica no botão, abre o modal
+        btn.onclick = function (event) {
+            event.preventDefault();
+            modal.style.display = "block";
+        }
+
+        // Quando o usuário clica no <span> (x), fecha o modal
+        span.onclick = function (event) {
+            event.preventDefault();
+            modal.style.display = "none";
+        }
+
+        // Quando o usuário clica fora do modal, fecha o modal
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        function checkAuthentication() {
+            if (!sessionStorage.length) {
+                window.location.href = "/entrar"; // Redirecionar para a tela de login
+            } else if (sessionStorage.isEngineer == "false") {
+                window.location.href = "/"; // Redireciona para a homepage de montador, caso o usuário seja montador
+            }
+        }
+
+        checkAuthentication();
+
+        document.getElementById('assemblyLineForm').addEventListener('submit', async function (e) {
+            e.preventDefault(); // Previne o envio do formulário
+
+            const form = e.target;
+            const formData = new FormData(form);
+
+            // Converte FormData para um objeto
+            const data = {};
+            formData.forEach((value, key) => {
+                if (!data[key]) {
+                    data[key] = value;
+                } else {
+                    if (!Array.isArray(data[key])) {
+                        data[key] = [data[key]];
+                    }
+                    data[key].push(value);
+                }
+            });
+
+            try {
+                const response = await fetch('/api/admin/assemblyLine/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Success:', result);
+                    window.location.href = '/engenheiro/linhas'; // Redireciona o usuário
+                } else {
+                    const error = await response.json();
+                    console.error('Error:', error);
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        });
+
+
+        $(document).ready(function () {
+            $('#manuals').select2();
+            $('#employees').select2();
+        });
+    </script>
+</body>
+
+</html>

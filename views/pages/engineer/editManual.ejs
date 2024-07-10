@@ -1,0 +1,381 @@
+<main id="edit-manual">
+  <!-- Formulário para editar um novo manual -->
+  <form action="/editManual" method="PUT">
+    <div class="container">
+      <h1>Edição de manual</h1>
+
+      <div class="left-side">
+        <section id="sectionTitle">
+          <!-- Campo para o título do manual -->
+          <h3>Título</h3>
+          <input class="text" id="title" required />
+          <p class="label-description">Adicione um título ao manual</p>
+        </section>
+
+        <section id="descriptionSection">
+          <!-- Campo para a descrição do manual -->
+          <div id="labelDescription">
+            <label for="textAreaDescription">
+              <h3>Descrição</h3>
+            </label>
+            <p id="counter">0/250</p>
+          </div>
+          <textarea
+            class="description"
+            id="textAreaDescription"
+            maxlength="250"
+            required
+          ></textarea>
+          <p class="label-description" id="labelOfDescription">
+            Adicione uma descrição ao manual
+          </p>
+        </section>
+      </div>
+
+      <div class="right-side">
+        <section id="selectHardwareType">
+          <!-- Campo para o tipo de hardware relacionado ao manual -->
+          <label>
+            <h3>Tipo de hardware</h3>
+          </label>
+          <select class="text" id="hardwareType" name="hardwareType" required>
+            <option value="" disabled selected>Selecione uma opção</option>
+            <option value="desktop">Desktop</option>
+            <option value="laptop">Notebook</option>
+            <option value="server">Servidor</option>
+            <option value="monitor">Monitor</option>
+            <option value="accessory">Acessório</option>
+            <option value="storage">Armazenamento</option>
+            <option value="workstation">Workstation</option>
+          </select>
+          <p class="label-description">Associe um tipo de hardware ao manual</p>
+        </section>
+
+        <section id="sectionLinks">
+          <!-- Campo para adicionar links ao manual -->
+          <label>
+            <h3>Adicionar Links</h3>
+          </label>
+          <div id="input-container">
+            <input
+              class="text"
+              name="link"
+              id="link"
+              placeholder="Digite o link..."
+            />
+            <div class="icon-container" onclick="addLink()">
+              <img
+                src="/images/icons/plus-add 3 - blue600.svg"
+                alt="add"
+                class="input-icon"
+              />
+            </div>
+          </div>
+          <p class="label-description">Adicione links ao manual</p>
+          <div id="tagsContainer">
+            <!-- As tags de links aparecerão aqui -->
+          </div>
+        </section>
+
+        <div class="botoesCancelarSalvar">
+          <button class="cancel" id="cancel">Cancelar</button>
+          <button class="save" id="save">Salvar</button>
+        </div>
+
+        <div id="modalCancelar" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Atenção!</h2>
+            <h4>
+              Deseja realmente cancelar a operação?<br />O progresso atual não
+              será restaurado
+            </h4>
+            <div class="botoesSimNao">
+              <button class="noButton" id="noButton">Não</button>
+              <button class="yesButton" id="yesButton">Sim</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="modalSucesso" class="modal">
+          <div class="modal-content" id="success">
+            <h2>Sucesso!</h2>
+            <h4>O manual foi editado com sucesso</h4>
+            <div class="confirmButton">
+              <button class="okButton" id="okButton">Confirmar</button>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          document.addEventListener("DOMContentLoaded", async () => {
+            function checkAuthentication() {
+              if (!sessionStorage.length) {
+                window.location.href = "/entrar"; // Redirecionar para a tela de login
+              } else if (sessionStorage.isEngineer == "false") {
+                window.location.href = "/"; // Redireciona para a homepage de montador, caso o usuário seja montador
+              }
+            }
+
+            checkAuthentication();
+
+            function changeMainHeight() {
+              let windowHeight = window.innerHeight; // Altura da janela do navegador
+              let footerAndHeaderHeight = 160; // Altura do footer
+              let mainHeight = windowHeight - footerAndHeaderHeight; // Calcula a altura disponível para o main
+
+              if (windowHeight <= 800) return;
+
+              // Define a altura do main
+              document.getElementById("edit-manual").style.height =
+                mainHeight + "px";
+            }
+
+            changeMainHeight();
+
+            // Buscar dados do manual para preencher o formulário
+            try {
+              const urlParams = new URLSearchParams(window.location.search);
+              const manualId = urlParams.get("id");
+              const response = await fetch(
+                `/api/admin/editManual?id=${manualId}`
+              );
+              const data = await response.json();
+
+              if (response.ok) {
+                document.getElementById("title").value = data.title;
+                document.getElementById("textAreaDescription").value =
+                  data.description;
+                document.getElementById("hardwareType").value =
+                  data.hardwareType;
+                count();
+              }
+            } catch (error) {
+              console.error("Erro ao buscar os dados do manual", error);
+            }
+
+            fetchLinks(); // Chama a função para buscar e adicionar links
+          });
+
+          async function fetchLinks() {
+            try {
+              const urlParams = new URLSearchParams(window.location.search);
+              const manualId = urlParams.get("id");
+              const response = await fetch(
+                `/api/admin/getMaterials?id=${manualId}`
+              );
+              const data = await response.json();
+
+              if (response.ok) {
+                data.forEach((material) => {
+                  addLink(material.link, false); // Adiciona os links existentes sem disparar o evento de clique
+                });
+              } else {
+                console.error("Erro ao buscar os materiais:", data.error);
+              }
+            } catch (error) {
+              console.error("Erro ao buscar os dados do manual", error);
+            }
+          }
+
+          var counter = document.getElementById("counter");
+          var description = document.getElementById("textAreaDescription");
+          var saveButton = document.getElementById("save");
+          var labelDescription = document.getElementById("labelOfDescription");
+
+          description.addEventListener("input", () => {
+            count();
+          });
+
+          function count() {
+            counter.textContent = description.value.length + "/250";
+            if (description.value.length > 250) {
+              description.style.color = "red";
+              counter.style.color = "red";
+              saveButton.disabled = true;
+              labelDescription.style.color = "red";
+            } else {
+              description.style.color = "black";
+              counter.style.color = "#7E7E7E";
+              saveButton.disabled = false;
+              labelDescription.textContent = "Adicione uma descrição ao manual";
+              labelDescription.style.color = "#7E7E7E";
+            }
+            if (description.value.length >= 250) {
+              labelDescription.textContent =
+                "A descrição não pode ter mais de 250 caracteres";
+            } else {
+              labelDescription.textContent = "Adicione uma descrição ao manual";
+            }
+          }
+
+          description.addEventListener("keydown", function (event) {
+            var length = description.value.length;
+
+            // Permite teclas de controle como Backspace, Delete, Setas, etc.
+            var allowedKeys = [
+              "Backspace",
+              "Delete",
+              "ArrowLeft",
+              "ArrowRight",
+              "ArrowUp",
+              "ArrowDown",
+              "Tab",
+            ];
+            if (allowedKeys.includes(event.key)) {
+              return;
+            }
+
+            if (length >= 250) {
+              event.preventDefault();
+            }
+          });
+
+          // Obter o modal
+          var modalCancelar = document.getElementById("modalCancelar");
+          var cancelButton = document.getElementById("cancel"); // Certifique-se de que este botão existe no seu HTML
+          var yesButton = document.getElementById("yesButton");
+          var noButton = document.getElementById("noButton");
+          var span = document.getElementsByClassName("close")[0];
+
+          // Quando o usuário clicar no botão, abre o modal
+          cancelButton.onclick = function (event) {
+            event.preventDefault();
+            modalCancelar.style.display = "block";
+          };
+
+          // Quando o usuário clicar no botão "Não", fecha o modal
+          noButton.onclick = function (event) {
+            event.preventDefault();
+            modalCancelar.style.display = "none";
+          };
+
+          // Quando o usuário clicar no botão "Sim", encamiha o usuário para a homepage
+          yesButton.onclick = function (event) {
+            event.preventDefault();
+            window.location.href = "/engenheiro";
+          };
+
+          // Quando o usuário clicar em <span> (x), fecha o modal
+          span.onclick = function (event) {
+            event.preventDefault();
+            modalCancelar.style.display = "none";
+          };
+
+          var modalSuccess = document.getElementById("modalSucesso");
+          var showSuccessButton = document.getElementById("save"); // Botão para mostrar o modal de sucesso
+          var okButton = document.getElementById("okButton");
+          var spanSuccess = modalSuccess.getElementsByClassName("close")[0];
+
+          // Função para enviar os dados atualizados para o servidor
+          async function updateMaterialAndManual(manualId, manualData) {
+            // Extrair os materiais do contêiner de tags
+            const materials = Array.from(
+              document.getElementById("tagsContainer").children
+            ).map((tag) => ({
+              manualId: manualId,
+              link: tag.querySelector("a").href,
+              type: tag.querySelector("a").href.split(".").pop(),
+            }));
+
+            try {
+              // Enviar a solicitação para atualizar o manual e os materiais
+              const response = await fetch(
+                `/api/admin/editManual?id=${manualId}`,
+                {
+                  method: "PUT",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify({
+                    ...manualData,
+                    materials,
+                  }),
+                }
+              );
+
+              // Verificar se a resposta não foi bem-sucedida
+              if (!response.ok) {
+                throw new Error("Erro ao atualizar o manual");
+              }
+            } catch (error) {
+              // Exibir mensagem de erro no console
+              console.error("Erro ao atualizar o manual:", error);
+            }
+          }
+
+          // Quando o usuário clicar no botão para mostrar o modal de sucesso, abre o modal
+          showSuccessButton.onclick = function (event) {
+            event.preventDefault(); // Previne o comportamento padrão do botão
+            const updatedManual = {
+              title: document.getElementById("title").value,
+              description: document.getElementById("textAreaDescription").value,
+              hardwareType: document.getElementById("hardwareType").value,
+            };
+            const urlParams = new URLSearchParams(window.location.search);
+            const manualId = urlParams.get("id");
+
+            updateMaterialAndManual(manualId, updatedManual)
+              .then(() => {
+                modalSuccess.style.display = "block";
+              })
+              .catch((error) => {
+                console.error(
+                  "Erro ao atualizar o manual ou materiais:",
+                  error
+                );
+              });
+          };
+
+          // Quando o usuário clicar no botão "Confirmar", fecha o modal
+          okButton.onclick = function (event) {
+            event.preventDefault();
+            window.location.href = "/engenheiro";
+          };
+
+          function addLink(url = "", userInitiated = true) {
+            const linkInput = document.getElementById("link");
+            if (userInitiated) {
+              url = linkInput.value;
+            }
+
+            if (url) {
+              const tagsContainer = document.getElementById("tagsContainer");
+
+              // Criar a tag do link
+              const tag = document.createElement("div");
+              tag.className = "tag";
+
+              // Criar o link
+              const link = document.createElement("a");
+              link.href = url;
+              link.target = "_blank";
+              link.innerText = url;
+
+              // Criar o botão de remover
+              const removeBtn = document.createElement("span");
+              removeBtn.innerText = "x";
+              removeBtn.onclick = function () {
+                tagsContainer.removeChild(tag);
+              };
+
+              // Adicionar o link e o botão de remover à tag
+              tag.appendChild(link);
+              tag.appendChild(removeBtn);
+
+              // Adicionar a tag ao container
+              tagsContainer.appendChild(tag);
+
+              // Limpar o input
+              if (userInitiated) {
+                linkInput.value = "";
+              }
+            } else {
+              alert("Por favor, insira um URL no campo de links.");
+            }
+          }
+        </script>
+      </div>
+    </div>
+  </form>
+</main>

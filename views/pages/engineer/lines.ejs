@@ -1,0 +1,260 @@
+<main id="lines">
+  <div>
+    <div>
+      <div>
+        <p>Classificar por:</p>
+        <select id="order">
+          <option value="titleASC" selected>Título (A-Z)</option>
+          <option value="titleDESC">Título (Z-A)</option>
+          <option value="createdAtDESC">Data criação (Mais recente)</option>
+          <option value="createdAtASC">Data criação (Mais antigo)</option>
+          <option value="manualsDESC">Manuais (Quantidade Descresente)</option>
+          <option value="manualsASC">Manuais (Quantidade Ascendente)</option>
+          <option value="employeesDESC">
+            Funcionários (Quantidade Descresente)
+          </option>
+          <option value="employeesASC">
+            Funcionários (Quantidade Ascendente)
+          </option>
+        </select>
+      </div>
+      <h1>Linhas de Montagem</h1>
+    </div>
+
+    <div>
+      <input
+        type="text"
+        name="serchManuals"
+        id="serchManuals"
+        placeholder="Pesquisar"
+        maxlength="150"
+      />
+      <button>
+        <img src="/images/icons/searchManuals.svg" alt="ícone de Pesquisa" />
+      </button>
+    </div>
+  </div>
+
+  <!-- Lista das linhas -->
+  <div id="linesList">
+    <!-- Essa div receberá as linhas -->
+
+    <!-- 
+      Modelo de manual:
+      <div class="lineContainer">
+        <div class="info">
+          <span><p>3 manuai(s)</p></span>
+          <p>13 montadore(s)</p>
+        </div>
+        <h1>Linha de Montagem</h1>
+        <p>
+          Lorem ipsum, dolor sit amet consectetur adipisicing elit. Harum,
+          deleniti. Enim quam voluptate rerum inventore ut modi omnis
+          voluptatibus. Expedita debitis laudantium laboriosam dolores id.
+          Aspernatur suscipit labore quas saepe?
+        </p>
+      </div> 
+    -->
+  </div>
+
+  <div id="pagesBtns">
+    <button id="backPage">
+      <img
+        src="/images/icons/chevronLeftPage.svg"
+        alt="Botão para retroceder uma página"
+      />
+    </button>
+    <button id="nextPage">
+      <img
+        src="/images/icons/chevronRightPage.svg"
+        alt="Botão para avançar uma página"
+      />
+    </button>
+  </div>
+</main>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    function checkAuthentication() {
+      if (!sessionStorage.length) {
+        window.location.href = "/entrar"; // Redirecionar para a tela de login
+      } else if (sessionStorage.isEngineer == "false") {
+        window.location.href = "/"; // Redireciona para a homepage de montador, caso o usuário seja montador
+      }
+    }
+
+    checkAuthentication();
+
+    // Função para ajustar a altura do elemento main
+    function changeMainHeight() {
+      let windowHeight = window.innerHeight; // Altura da janela do navegador
+      let footerAndHeaderHeight = 160; // Altura do footer
+      let mainHeight = windowHeight - footerAndHeaderHeight; // Calcula a altura disponível para o main
+
+      if (document.getElementById("linesList").offsetHeight > mainHeight) {
+        document.getElementById("lines").removeAttribute("style");
+        return;
+      }
+
+      if (windowHeight <= 800) return;
+
+      // Define a altura do main
+      document.getElementById("lines").style.height = mainHeight + "px";
+    }
+
+    // Chama a função quando a página é carregada e redimensionada
+    window.addEventListener("load", changeMainHeight);
+    window.addEventListener("resize", changeMainHeight);
+
+    async function fetchLines(sortBy = "nameASC", page = 1, search = "") {
+      try {
+        const cleanSearch = search.trim(); // Remove espaços em branco antes e depois do termo pesquisado
+
+        const response = await fetch("/api/admin/assemblyLine/list", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            employeeId: sessionStorage.id,
+            sortBy,
+            page,
+            cleanSearch,
+          }),
+        });
+
+        const data = await response.json();
+
+        // Verifica se há dados retornados pela API
+        if (data.rows && data.rows.length > 0) {
+          const linesList = document.getElementById("linesList");
+
+          // Limpa o conteúdo anterior da lista de linhas de montagem
+          linesList.innerHTML = "";
+
+          // Itera sobre cada linha de montagem retornada e cria os containers
+          data.rows.forEach((line) => {
+            const lineContainer = createLineContainer(line);
+            linesList.innerHTML += lineContainer;
+          });
+
+          // Mostra/esconde os botões de navegação de página conforme necessário
+          document.getElementById("pagesBtns").style.display =
+            page == 1 && data.rows.length < 15 ? "none" : "flex";
+
+          document.querySelector(
+            "div#pagesBtns > button:first-child"
+          ).style.visibility = page == 1 ? "hidden" : "visible";
+
+          document.querySelector(
+            "div#pagesBtns > button:last-child"
+          ).style.visibility =
+            page > 1 && data.rows.length < 15 ? "hidden" : "visible";
+        } else {
+          // Caso não haja linhas de montagem retornadas, exibe uma mensagem adequada
+          document.getElementById("linesList").innerHTML =
+            "<h2>Não há linhas de montagem</h2>";
+
+          // Esconde os botões de navegação de página
+          document.getElementById("pagesBtns").style.display = "none";
+        }
+
+        changeMainHeight();
+      } catch (error) {
+        console.error("Error fetching Assembly Lines:", error);
+      }
+    }
+
+    // Função para deixar a primeira letra maiúscula
+    function capitalizeFirstLetter(text) {
+      if (!text) return "";
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    // Função para colocar reticências no fim do texto caso ele seja muito longo
+    function truncateText(text, maxLength) {
+      if (text.length > maxLength) {
+        return text.slice(0, maxLength) + "...";
+      }
+      return text;
+    }
+
+    // Função para criar o container do manual
+    function createLineContainer(line) {
+      const maxTitleLength = 19;
+      const maxDescriptionLength = 53;
+
+      const lineName = capitalizeFirstLetter(
+        truncateText(line.name, maxTitleLength)
+      );
+      const lineDescription = capitalizeFirstLetter(
+        truncateText(line.description, maxDescriptionLength)
+      );
+
+      return `
+        <div class="lineContainer">
+          <div class="info">
+            <span><p>${line.manualsqtd} manual(s)</p></span>
+            <p>${line.employeeqtd} montadore(s)</p>
+          </div>
+          <h1>${lineName}</h1>
+          <p>${lineDescription}</p>
+        </div>
+      `;
+    }
+
+    let currentPage = 1;
+
+    document.getElementById("order").addEventListener("change", (event) => {
+      const sortBy = event.target.value;
+      fetchLines(sortBy);
+
+      currentPage = 1;
+    });
+
+    // Pesquisa com enter
+    document
+      .getElementById("serchManuals")
+      .addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          const sortBy = document.getElementById("order").value;
+
+          currentPage = 1; // diz que a página atual é novamente a primeira para evitar que, caso o usuário tenha passado de página, nova filtragem busque com um offset diferente de
+
+          this.value
+            ? fetchLines(sortBy, currentPage, this.value)
+            : fetchLines(sortBy);
+        }
+      });
+
+    // Adiciona o ouvinte de eventos para o clique na imagem de pesquisa
+    document
+      .querySelector('main#lines img[alt="ícone de Pesquisa"]')
+      .addEventListener("click", function () {
+        const searchValue = document.getElementById("serchManuals").value;
+        const sortBy = document.getElementById("order").value;
+
+        currentPage = 1;
+
+        searchValue
+          ? fetchLines(sortBy, currentPage, searchValue)
+          : fetchLines(sortBy);
+      });
+
+    // Adicione event listeners para os botões de paginação
+    document.getElementById("backPage").addEventListener("click", () => {
+      const sortBy = document.getElementById("order").value;
+      currentPage--;
+      fetchLines(sortBy, currentPage);
+    });
+
+    document.getElementById("nextPage").addEventListener("click", () => {
+      const sortBy = document.getElementById("order").value;
+      currentPage++;
+      fetchLines(sortBy, currentPage);
+    });
+
+    fetchLines();
+  });
+</script>

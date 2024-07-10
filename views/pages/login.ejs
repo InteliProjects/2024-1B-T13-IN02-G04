@@ -1,0 +1,180 @@
+<main id="login">
+  <!-- Seção esquerda do formulário de login -->
+  <section id="leftSide">
+    <img
+      id="logoDellImg"
+      src="images/DellTechnologiesLogo.png"
+      alt="Logotipo da Dell Technologies"
+    />
+
+    <h2>Login</h2>
+
+    <form id="loginForm">
+      <!-- Campo para entrada de email -->
+      <div>
+        <label for="email">E-mail</label>
+        <div class="inputAndIcon">
+          <img
+            src="/images/icons/mail.svg"
+            alt="Imagem para indicar o formulário é de e-mail"
+          />
+          <input
+            type="email"
+            id="email"
+            title="Digite seu e-mail"
+            name="email"
+            maxlength="150"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- Campo para entrada de senha -->
+      <div>
+        <div>
+          <label for="password">Senha Atual</label>
+          <button
+            type="button"
+            aria-label="Exibir ou ocultar senha"
+            aria-pressed="false"
+            id="togglePassword"
+            minlength="10"
+          >
+            Mostrar
+          </button>
+        </div>
+        <div class="inputAndIcon">
+          <img
+            src="/images/icons/key.svg"
+            alt="Imagem para indicar o formulário é de senha"
+          />
+          <input
+            type="password"
+            id="password"
+            maxlength="50"
+            minlength="8"
+            name="password"
+            title="Digite sua senha"
+            required
+          />
+        </div>
+      </div>
+
+      <!-- Botão para submeter o formulário -->
+      <button id="buttonLogin" type="submit">Entrar</button>
+    </form>
+  </section>
+
+  <!-- Seção direita do formulário de login com uma mensagem de boas-vindas -->
+  <section id="rightSide">
+    <h1>Seja bem-vindo ao Edellcation</h1>
+    <h2>Acesse todos os manuais em um único lugar</h2>
+
+    <!-- Imagem exibida na seção direita do formulário de login -->
+    <img src="/images/notebook.png" alt="Imagem de um notebook" />
+  </section>
+
+  <div id="actionResult" class="failed">
+    <img
+      src="/images/icons/failed.svg"
+      alt="Ícone que indica que indica o resultado da ação."
+    />
+    <p>Resultado da ação</p>
+    <!-- Receberá o resultado da ação -->
+  </div>
+
+  <div id="actionResult" class="failed">
+    <img
+      src="/images/icons/failed.svg"
+      alt="Ícone que indica que indica o resultado da ação."
+    />
+    <p>Resultado da ação</p>
+    <!-- Receberá o resultado da ação -->
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function checkAuthentication() {
+        // Checa se usuário já está logado
+        if (sessionStorage.length) {
+          sessionStorage.isEngineer == "true"
+            ? (window.location.href = "/engenheiro") // Envia para a homepage de engenheiro caso o usuário já esteja logado
+            : (window.location.href = "/"); // Redirecionar para hompege de montador caso usuário já esteja logado
+        }
+      }
+
+      checkAuthentication();
+
+      const togglePasswordButton = document.getElementById("togglePassword");
+      const passwordInput = document.getElementById("password");
+
+      togglePasswordButton.addEventListener("click", function () {
+        if (passwordInput.type === "password") {
+          passwordInput.type = "text";
+          togglePasswordButton.textContent = "Ocultar";
+        } else {
+          passwordInput.type = "password";
+          togglePasswordButton.textContent = "Mostrar";
+        }
+      });
+
+      // Função para enviar os dados do formulário
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+          const formData = new FormData(document.getElementById("loginForm"));
+          const data = Object.fromEntries(formData.entries());
+
+          const actionResult = document.getElementById("actionResult");
+          const resultText = actionResult.querySelector("p");
+
+          try {
+            const response = await fetch("/api/login", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify(data),
+            });
+            const result = await response.json();
+            if (response.ok) {
+
+              // Extrair o primeiro nome da string do nome completo
+              const firstName = result.employee.name.split(" ")[0];
+
+              // Armazenar os valores no sessionStorage
+              sessionStorage.setItem("id", result.employee.id);
+              sessionStorage.setItem("firstName", firstName);
+              sessionStorage.setItem("password", result.employee.password);
+              sessionStorage.setItem("isEngineer", result.employee.isEngineer);
+
+              result.employee.isEngineer
+                ? (window.location.href = "/engenheiro")
+                : (window.location.href = "/");
+            } else {
+              console.error("Erro ao logar", result);
+
+              // Estiliza o pop-up para o caso de e-mail ou senha incorretos
+              resultText.textContent = "E-mail ou senha incorretos";
+              actionResult.style.display = "flex";
+
+              setTimeout(() => {
+                actionResult.style.display = "none";
+              }, 5000);
+            }
+          } catch (error) {
+            console.error("Erro ao logar", error);
+
+            // Estiliza o pop-up para o caso de erro de servidor
+            resultText.textContent = "Erro ao logar";
+            actionResult.style.display = "flex";
+
+            setTimeout(() => {
+              actionResult.style.display = "none";
+            }, 5000);
+          }
+        });
+    });
+  </script>
+</main>

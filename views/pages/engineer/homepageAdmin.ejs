@@ -1,0 +1,297 @@
+<main id="homepageAdmin">
+  <!-- Seção do dashboard -->
+  <section id="dashboard" class="">
+    <!-- Status da Linha de Montagem -->
+    <div class="StatusLinhaMontagem">
+      <h2>Linhas de Montagem</h2>
+      <canvas id="barChart"></canvas>
+    </div>
+    <!-- Status das Tarefas -->
+    <div class="StatusTarefas">
+      <h2>Todas as tarefas</h2>
+      <div class="chart-container">
+        <canvas id="taskChart"></canvas>
+        <button id="createLines">Nova Linha</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Seção de Manuais para Admin -->
+  <section id="manuaisAdmin">
+    <h3>Manuais</h3>
+    <div class="relativeToBtn">
+      <div class="carroussel"></div>
+      <img src="/images/icons/chevronLeft.svg" alt="ícone de seta para esquerda" class="backButton" />
+      <img src="/images/icons/chevronRight.svg" alt="ícone de seta para direita" class="nextButton" />
+    </div>
+    <button id="addManual">Novo Manual</button>
+  </section>
+</main>
+
+<!-- Inclusão do Chart.js para criação de gráficos -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  function openEditManualView(manualId) {
+    window.location.href = `/engenheiro/editar-manual?id=${manualId}`;
+  }
+  document.addEventListener("DOMContentLoaded", function () {
+    function checkAuthentication() {
+      if (!sessionStorage.length) {
+        window.location.href = "/entrar"; // Redirecionar para a tela de login
+      } else if (sessionStorage.isEngineer == "false") {
+        window.location.href = "/"; // Redireciona para a homepage de montador, caso o usuário seja montador
+      }
+    }
+
+    checkAuthentication();
+
+    // Função para buscar dados de status das tarefas via API
+    async function fetchData() {
+      try {
+        const response = await fetch("/api/admin/task-status");
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Erro ao buscar os dados do status das tarefas:", error);
+      }
+    }
+
+    // Seletor do botão de adicionar manual
+    const newManualButton = document.getElementById("addManual");
+
+    // Adicionando um ouvinte de evento de clique ao botão de adicionar manual
+    newManualButton.addEventListener("click", function () {
+      window.location.href = "/engenheiro/novo-manual"; // Redireciona para a página de adicionar manual
+    });
+
+    // Seletor do botão para ver linhas de montagem
+    const createLinesBtn = document.getElementById("createLines");
+
+    // Adicionando um ouvinte de evento de clique ao botão de ver linhas de montagem
+    createLinesBtn.addEventListener("click", function () {
+      window.location.href = "/engenheiro/nova-linha"; // Redireciona para a página de linhas de montagem
+    });
+
+    // Função para renderizar o gráfico de tarefas
+    function renderChart(completed, pending) {
+      const ctx = document.getElementById("taskChart").getContext("2d");
+      const taskChart = new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: ["Tarefas feitas", "Tarefas pendentes"],
+          datasets: [{
+            data: [completed, pending],
+            backgroundColor: ["#31356E", "#C82727"],
+            borderWidth: 1,
+          }, ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "bottom", // Posiciona a legenda embaixo do gráfico
+              labels: {
+                boxWidth: 20,
+                padding: 10,
+              },
+            },
+          },
+          maintainAspectRatio: false, // Permite ajustar o aspecto do gráfico
+        },
+      });
+    }
+
+    // Função para atualizar o gráfico com novos dados
+    async function updateChart() {
+      const data = await fetchData();
+      if (data) {
+        renderChart(data.completed, data.pending);
+      }
+    }
+
+    // Carrega o gráfico inicialmente
+    updateChart();
+
+    async function fetchAndCreateChart() {
+      try {
+        const response = await fetch("/api/admin/status-by-assembly-line");
+        const data = await response.json();
+        createBarChart(data);
+      } catch (error) {
+        console.error("Erro ao buscar dados do backend:", error);
+      }
+    }
+
+    function createBarChart(data) {
+      const linhasMontagem = data.map((linha) => linha.linhaMontagem);
+      const tarefasFeitas = data.map((linha) => linha.tarefasFeitas);
+      const tarefasPendentes = data.map((linha) => linha.tarefasPendentes);
+
+      const ctx = document.getElementById("barChart").getContext("2d");
+      const barChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: linhasMontagem,
+          datasets: [{
+              label: "Tarefas Feitas",
+              backgroundColor: "#31356E",
+              borderWidth: 1,
+              data: tarefasFeitas,
+            },
+            {
+              label: "Tarefas Pendentes",
+              backgroundColor: "#C82727",
+              borderWidth: 1,
+              data: tarefasPendentes,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              ticks: {
+                autoSkip: false, // Mostra todos os rótulos
+                maxRotation: 90, // Rotaciona os rótulos para melhor leitura
+                minRotation: 45,
+              }
+            },
+          },
+          plugins: {
+            legend: {
+              position: "bottom",
+            },
+          },
+        },
+      });
+    }
+    fetchAndCreateChart();
+
+    // Função para criar o container de um manual
+    function createManualContainer(manual) {
+      const maxTitleLength = 22;
+      const maxDescriptionLength = 50;
+
+      const hardwareType = capitalizeFirstLetter(manual.hardwareType);
+      const title = capitalizeFirstLetter(truncateText(manual.title, maxTitleLength));
+      const description = capitalizeFirstLetter(truncateText(manual.description, maxDescriptionLength));
+
+      const materialTypes = manual.materialTypes && manual.materialTypes.split(", ") || [];
+
+      const materialIcons = {
+        "3d": "3d.svg",
+        img: "img.svg",
+        vid: "vid.svg",
+        pdf: "pdf.svg",
+      };
+
+      const materialIconsHTML = materialTypes.map((type) => {
+        if (materialIcons[type]) {
+          return `<img src="/images/icons/${materialIcons[type]}" alt="Material ${type.toUpperCase()}" />`;
+        } else {
+          console.warn(`Tipo de material não reconhecido: ${type}`);
+          return '';
+        }
+      }).join("");
+
+      return `
+    <div class="manualContainer" onclick="openEditManualView('${manual.id}')">
+      <div class="imageContainer ${manual.hardwareType}Background">
+        <img src="/images/productsTypes/${manual.hardwareType}.png" alt="${title}" 
+             onerror="this.onerror=null;this.src='/images/productsTypes/empty.png';" />
+      </div>
+      <div class="contentContainer">
+        <div>
+          <span>${hardwareType}</span> 
+          <div class="materialTypesIcons">
+            ${materialIconsHTML}
+          </div>
+        </div>
+        <h4>${title}</h4>
+        <p>${description}</p>
+      </div>
+    </div>
+  `;
+    }
+
+
+    // Função para verificar o overflow do carrossel
+    function checkOverflow(carroussel) {
+      const backButton = carroussel.parentElement.querySelector(".backButton");
+      const nextButton = carroussel.parentElement.querySelector(".nextButton");
+
+      if (carroussel.scrollWidth > carroussel.clientWidth) {
+        backButton.style.display = "block";
+        nextButton.style.display = "block";
+      } else {
+        backButton.style.display = "none";
+        nextButton.style.display = "none";
+      }
+    }
+
+    // Lógica para manipulação do carrossel
+    const carrousels = document.querySelectorAll(".carroussel");
+
+    carrousels.forEach((carroussel) => {
+      const backButton = carroussel.parentElement.querySelector(".backButton");
+      const nextButton = carroussel.parentElement.querySelector(".nextButton");
+
+      function scrollCarroussel(direction) {
+        const scrollAmount = 400;
+        carroussel.scrollBy({
+          left: direction * scrollAmount,
+          behavior: "smooth",
+        });
+      }
+
+      backButton.addEventListener("click", () => scrollCarroussel(-1));
+      nextButton.addEventListener("click", () => scrollCarroussel(1));
+
+      // Checa se o conteúdo ultrapassa o container pai
+      checkOverflow(carroussel);
+
+      // Recheca se a janela for redimensionada
+      window.addEventListener("resize", () => checkOverflow(carroussel));
+    });
+
+    // Função para capitalizar a primeira letra de um texto
+    function capitalizeFirstLetter(text) {
+      if (!text) return "";
+      return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    // Função para truncar um texto com comprimento máximo
+    function truncateText(text, maxLength) {
+      if (text.length > maxLength) {
+        return text.slice(0, maxLength) + "...";
+      }
+      return text;
+    }
+
+    // Função para buscar e renderizar os últimos manuais publicados
+    async function fetchLatestManuals() {
+      try {
+        const response = await fetch("/api/admin/getLatestManuals", {
+          method: "GET",
+        });
+        const data = await response.json();
+        if (data.rows && data.rows.length > 0) {
+          const manualsSection = document.querySelector("#manuaisAdmin .carroussel");
+          manualsSection.innerHTML = data.rows.map(createManualContainer).join("");
+
+          // Chama checkOverflow para ajustar a visibilidade das setas do carrossel
+          checkOverflow(manualsSection);
+        } else {
+          console.warn("Nenhum manual encontrado.");
+        }
+      } catch (error) {
+        console.error("Error fetching latest manuals:", error);
+      }
+    }
+
+    // Chama a função para buscar e renderizar os últimos manuais publicados
+    fetchLatestManuals();
+  });
+
+</script>

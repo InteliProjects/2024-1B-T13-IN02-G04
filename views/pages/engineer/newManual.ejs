@@ -1,0 +1,282 @@
+<main id="add-manual">
+  <!-- Formulário para criar um novo manual -->
+  <form id="manualForm" action="/api/admin/newManual" method="POST"> 
+
+    <div class="container">
+      <h1>Criação de manuais</h1>
+
+      <div class="left-side">
+
+        <section id="sectionTitle">
+          <!-- Campo para o título do manual -->
+          <label for="title">
+            <h3>Título</h3>
+          </label>
+          <p class="label-description">Adicione um título ao manual</p>
+          <input class="text" id="title" name="title" required />
+        </section>
+
+        <section id="descriptionSection">
+          <!-- Campo para a descrição do manual -->
+          <label for="textAreaDescription">
+            <h3>Descrição</h3>
+          </label>
+          <p class="label-description">Adicione uma descrição ao manual</p>
+          <p id="counter">0/250</p>
+          <textarea class="description" id="textAreaDescription" name="description" maxlength="250" required></textarea>
+        </section>
+
+      </div>
+
+      <div class="right-side">
+
+        <section id="selectHardwareType">
+          <!-- Campo para o tipo de hardware relacionado ao manual -->
+          <label for="hardwareType">
+            <h3>Tipo de hardware</h3>
+          </label>
+          <p class="label-description">Associe um tipo de hardware ao manual</p>
+          <select class="text" id="hardwareType" name="hardwareType" required>
+            <option value="" disabled selected>Selecione uma opção</option>
+            <option value="desktop">Desktop</option>
+            <option value="laptop">Notebook</option>
+            <option value="server">Servidor</option>
+            <option value="monitor">Monitor</option>
+            <option value="accessory">Acessório</option>
+            <option value="storage">Storage</option>
+            <option value="workstation">Workstation</option>
+          </select>
+        </section>
+
+        <section id="link">
+          <!-- Campo para o link do material de apoio -->
+          <label for="link">
+            <h3>Link do material de apoio</h3>
+          </label>
+          <p class="label-description">Adicione o link para o material de apoio</p>
+          <input class="text" id="link" name="link" required />
+        </section>
+
+        <div class="botoesCancelarSalvar">
+          <button class="cancel" id="cancel">Cancelar</button>
+          <button class="save" id="save">Salvar</button>
+        </div>
+
+        <div id="modalCancelar" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Atenção!</h2>
+            <h4>Deseja realmente cancelar a operação?<br> O progresso atual não será restaurado</h4>
+            <div class="botoesSimNao">
+              <button class="noButton" id="noButton">Não</button>
+              <button class="yesButton" id="yesButton">Sim</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="modalSucesso" class="modal">
+          <div class="modal-content" id="success">
+            <span class="close">&times;</span>
+            <h2>Confirmação</h2>
+            <h4>Manual criado com sucesso</h4>
+            <div class="confirmButton">
+              <button class="okButton" id="saveManual">Confirmar</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="modalConfirmacao" class="modal">
+          <div class="modal-content" id="confirmation">
+            <span class="close">&times;</span>
+            <h2>Sucesso!</h2>
+            <h4>O manual foi criado com sucesso</h4>
+            <div class="confirmButton">
+              <button class="okButton" id="okButtonConfirmacao">Confirmar</button>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          // Função para verificar a autenticação do usuário
+          function checkAuthentication() {
+            if (!sessionStorage.length) {
+              window.location.href = "/entrar"; // Redirecionar para a tela de login se não houver sessão
+            } else if (sessionStorage.isEngineer == "false") {
+              window.location.href = "/"; // Redirecionar para a homepage de montador se o usuário não for engenheiro
+            }
+          }
+
+          checkAuthentication();
+
+          // Adiciona evento ao botão de salvar para enviar os dados do formulário
+          document.getElementById('save').addEventListener('click', async function (event) {
+            event.preventDefault();
+
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('textAreaDescription').value;
+            const hardwareType = document.getElementById('hardwareType').value;
+            const link = document.getElementById('link').value;
+
+            const manualData = {
+              title,
+              description,
+              hardwareType,
+              link
+            };
+
+            try {
+              const response = await fetch('/api/admin/newManual', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(manualData)
+              });
+
+              if (response.ok) {
+                // Exibir modal de sucesso ou redirecionar para outra página
+                document.getElementById('modalSucesso').style.display = 'block';
+              } else {
+                const errorData = await response.json();
+                console.error("Erro ao criar manual", errorData);
+              }
+            } catch (error) {
+              console.error("Erro ao criar manual", error);
+            }
+          });
+
+
+          // Contador de caracteres na descrição
+          var counter = document.getElementById("counter");
+          var description = document.getElementById("textAreaDescription");
+          var saveButton = document.getElementById("save");
+          var labelDescription = document.getElementById("labelOfDescription");
+
+          description.addEventListener("input", function () {
+            counter.textContent = description.value.length + "/250";
+            if (description.value.length > 250) {
+              description.style.color = "red";
+              counter.style.color = "red";
+              saveButton.disabled = true;
+              labelDescription.style.color = "red";
+            } else {
+              description.style.color = "black";
+              counter.style.color = "#7E7E7E";
+              saveButton.disabled = false;
+              labelDescription.textContent = "Adicione uma descrição ao manual";
+              labelDescription.style.color = "#7E7E7E";
+            }
+            if (description.value.length >= 250) {
+              labelDescription.textContent = "A descrição não pode ter mais de 250 caracteres";
+            } else {
+              labelDescription.textContent = "Adicione uma descrição ao manual";
+            }
+          });
+
+          // Impede a entrada de mais de 250 caracteres na descrição
+          description.addEventListener("keydown", function (event) {
+            var length = description.value.length;
+
+            // Permite teclas de controle como Backspace, Delete, Setas, etc.
+            var allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Tab'];
+            if (allowedKeys.includes(event.key)) {
+              return;
+            }
+
+            if (length >= 250) {
+              event.preventDefault();
+            }
+          });
+
+          // Obter o modal de cancelamento
+          var modal = document.getElementById("modalCancelar");
+          var cancelButton = document.getElementById("cancel");
+          var yesButton = document.getElementById("yesButton");
+          var noButton = document.getElementById("noButton");
+          var span = document.getElementsByClassName("close")[0];
+
+          // Quando o usuário clicar no botão "Cancelar", abre o modal de cancelamento
+          cancelButton.onclick = function (event) {
+            event.preventDefault();
+            modal.style.display = "block";
+          }
+
+          // Quando o usuário clicar no botão "Não" no modal de cancelamento, fecha o modal
+          noButton.onclick = function (event) {
+            event.preventDefault();
+            modal.style.display = "none";
+          }
+
+          // Quando o usuário clicar no botão "Sim" no modal de cancelamento, redireciona para a homepage
+          yesButton.onclick = function (event) {
+            event.preventDefault();
+            window.location.href = "/engenheiro/";
+          }
+
+          // Quando o usuário clicar no <span> (x), fecha o modal de cancelamento
+          span.onclick = function (event) {
+            event.preventDefault();
+            modal.style.display = "none";
+          }
+
+          // Modal de sucesso
+          var modalSuccess = document.getElementById("modalSucesso");
+          var showSuccessButton = document.getElementById("save"); // Botão para mostrar o modal de sucesso
+          var okButton = document.getElementById("okButton");
+          var cancelSuccessButton = document.getElementById("cancelSuccessButton");
+          var span = modalSuccess.getElementsByClassName("close")[0];
+
+          // Modal de confirmação
+          var modalConfirmacao = document.getElementById("modalConfirmacao");
+          var okButtonConfirmacao = document.getElementById("okButtonConfirmacao");
+
+          // Quando o usuário clicar no botão para mostrar o modal de sucesso, abre o modal
+          showSuccessButton.onclick = function (event) {
+            event.preventDefault(); // Previne o comportamento padrão do botão
+            modalSuccess.style.display = "block";
+          }
+
+          // Quando o usuário clicar no botão "Confirmar" no modal de sucesso, fecha o modal e abre o modal de confirmação
+          okButton.onclick = function (event) {
+            event.preventDefault();
+            modalSuccess.style.display = "none";
+            modalConfirmacao.style.display = "block";
+          }
+
+          // Quando o usuário clicar no botão "Cancelar" no modal de sucesso, fecha o modal
+          cancelSuccessButton.onclick = function (event) {
+            event.preventDefault();
+            modalSuccess.style.display = "none";
+          }
+
+          // Quando o usuário clicar no botão "Confirmar" no modal de confirmação, fecha o modal
+          okButtonConfirmacao.onclick = function (event) {
+            event.preventDefault();
+            modalConfirmacao.style.display = "none";
+          }
+
+          // Quando o usuário clicar no <span> (x), fecha ambos os modais
+          span.onclick = function (event) {
+            event.preventDefault();
+            modalSuccess.style.display = "none";
+            modalConfirmacao.style.display = "none";
+          }
+
+          // Quando o usuário clicar fora dos modais, fecha os modais abertos
+          window.onclick = function (event) {
+            if (event.target === modalSuccess) {
+              modalSuccess.style.display = "none";
+            }
+            if (event.target === modalConfirmacao) {
+              modalConfirmacao.style.display = "none";
+            }
+          }
+        </script>
+
+      </div>
+
+    </div>
+
+  </form>
+
+</main>

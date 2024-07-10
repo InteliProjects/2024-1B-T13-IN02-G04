@@ -1,0 +1,480 @@
+<main id="allManuals">
+  <aside>
+    <div>
+      <p>Classificar por:</p>
+      <select id="order">
+        <option value="title" selected>Título (A-Z)</option>
+        <option value="status">Status de conclusão</option>
+        <option value="createdAt">Data de criação</option>
+        <option value="lastAccessed">Visitado por último</option>
+      </select>
+    </div>
+
+    <ul id="filterMenu">
+      <li class="filterType">
+        <div id="dropFiltersBtn" class="dropBtn">
+          Filtros
+          <img
+            src="/images/icons/<%= filter === 'tasks' || filter === 'favorites' ? 'chevronUp.svg' : 'chevronDown.svg' %>"
+            alt="Seta para abrir ou fechar menu"
+            id="chevronIcoFilter"
+          />
+        </div>
+        <ul
+          id="dropFilters"
+          style="<%= filter === 'tasks' || filter === 'favorites'  ? 'display: flex;' : 'display: none;' %>"
+        >
+          <li>
+            <input type="checkbox" id="tasks" name="tasks" <%= filter ===
+            'tasks' ? 'checked' : '' %>/>
+            <label for="tasks">Tarefas</label>
+          </li>
+          <li>
+            <input type="checkbox" id="favorites" name="favorites" <%= filter
+            === 'favorites' ? 'checked' : '' %>/>
+            <label for="favorites">Favoritos</label>
+          </li>
+        </ul>
+      </li>
+
+      <li class="filterType">
+        <div id="dropCategoriesBtn" class="dropBtn">
+          Categorias
+          <img
+            src="/images/icons/chevronDown.svg"
+            alt="Seta para abrir ou fechar menu"
+            id="chevronIcoCategory"
+          />
+        </div>
+        <ul id="dropCategories">
+          <li>
+            <input type="checkbox" id="laptop" name="laptop" />
+            <label for="laptop">Notebook</label>
+          </li>
+          <li>
+            <input type="checkbox" id="workstation" name="workstation" />
+            <label for="workstation">Workstation</label>
+          </li>
+          <li>
+            <input type="checkbox" id="desktop" name="desktop" />
+            <label for="desktop">Desktop</label>
+          </li>
+          <li>
+            <input type="checkbox" id="accessory" name="accessory" />
+            <label for="accessory">Acessório</label>
+          </li>
+          <li>
+            <input type="checkbox" id="storage" name="storage" />
+            <label for="storage">Armazenamento</label>
+          </li>
+          <li>
+            <input type="checkbox" id="server" name="server" />
+            <label for="server">Servidor</label>
+          </li>
+          <li>
+            <input type="checkbox" id="monitor" name="monitor" />
+            <label for="monitor">Monitor</label>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </aside>
+
+  <section>
+    <!-- Dependendo do valor recebido, exibir um título diferente -->
+    <div>
+      <% if (filter == 'none') { %>
+      <h1>Manuais</h1>
+      <% }else if (filter == 'search') { %>
+      <h1>Pesquisa</h1>
+      <% }else if (filter == 'tasks') { %>
+      <h1>Tarefas</h1>
+      <% }else if (filter == 'favorites') { %>
+      <h1>Favoritos</h1>
+      <% } %>
+
+      <div>
+        <input type="text" name="serchManuals" id="serchManuals"
+        placeholder="Pesquisar" maxlength="150" <%= filter === 'search' ?
+        'autofocus' : '' %>/>
+        <button>
+          <img src="/images/icons/searchManuals.svg" alt="ícone de Pesquisa" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Lista dos manuais -->
+    <div id="manualsList"><!-- Aqui receberá os manuais --></div>
+
+    <div id="pagesBtns">
+      <button id="backPage">
+        <img
+          src="/images/icons/chevronLeftPage.svg"
+          alt="Botão para retroceder uma página"
+        />
+      </button>
+      <button id="nextPage">
+        <img
+          src="/images/icons/chevronRightPage.svg"
+          alt="Botão para avançar uma página"
+        />
+      </button>
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function checkAuthentication() {
+        if (!sessionStorage.length) window.location.href = "/entrar"; // Redirecionar para a tela de login
+      }
+
+      checkAuthentication();
+
+      // Função para abrir filtros:
+      function openDropdownFilter(btn, list, img) {
+        document.getElementById(btn).addEventListener("click", () => {
+          const dropCategories = document.getElementById(list);
+          const chevronImage = document.getElementById(img);
+
+          if (dropCategories.style.display == "flex") {
+            dropCategories.style.display = "none";
+            chevronImage.src = "/images/icons/chevronDown.svg"; // Define o ícone para aberto
+          } else {
+            dropCategories.style.display = "flex";
+            chevronImage.src = "/images/icons/chevronUp.svg"; // Define o ícone para fechado
+          }
+        });
+      }
+
+      if (sessionStorage.isEngineer == "true") {
+        document.querySelector("li.filterType:first-child").style.display =
+          "none";
+      } else {
+        openDropdownFilter("dropFiltersBtn", "dropFilters", "chevronIcoFilter");
+      }
+
+      openDropdownFilter(
+        "dropCategoriesBtn",
+        "dropCategories",
+        "chevronIcoCategory"
+      );
+
+      // Função para remover objetos duplicados com base no manual_id
+      function removeDuplicates(array) {
+        // Cria um Set para armazenar manual_id únicos
+        const seen = new Set();
+
+        // Filtra o array, removendo objetos duplicados com base no manual_id
+        return array.filter((item) => {
+          // Verifica se o manual_id do item atual já foi visto
+          const duplicate = seen.has(item.manual_id);
+
+          // Adiciona o manual_id do item atual ao Set
+          seen.add(item.manual_id);
+
+          // Retorna true se o item não for um duplicado, false caso contrário
+          return !duplicate;
+        });
+      }
+
+      // Função para deixar a primeira letra maiúscula
+      function capitalizeFirstLetter(text) {
+        if (!text) return "";
+        return text.charAt(0).toUpperCase() + text.slice(1);
+      }
+
+      // Função para colocar reticências no fim do texto caso ele seja muito longo
+      function truncateText(text, maxLength) {
+        if (text.length > maxLength) {
+          return text.slice(0, maxLength) + "...";
+        }
+        return text;
+      }
+
+      // Função para criar o container do manual
+      function createManualContainer(manual) {
+        const maxTitleLength = 19;
+        const maxDescriptionLength = 65;
+
+        const title = capitalizeFirstLetter(
+          truncateText(manual.title, maxTitleLength)
+        );
+        const description = capitalizeFirstLetter(
+          truncateText(manual.description, maxDescriptionLength)
+        );
+
+        const materialTypes = manual.materialtypes
+          ? [...new Set(manual.materialtypes.split(", "))]
+          : [];
+
+        // Mapeando os tipos de materiais para suas imagens correspondentes
+        const materialIcons = {
+          "3d": "3d.svg",
+          stp: "3d.svg",
+          img: "img.svg",
+          png: "img.svg",
+          jpg: "img.svg",
+          pdf: "pdf.svg",
+          vid: "vid.svg",
+          mkv: "vid.svg",
+          mp4: "vid.svg",
+        };
+
+        // Gerando HTML para os ícones de materiais
+        const materialIconsHTML = materialTypes
+          .map((type) => {
+            if (!materialIcons[type]) return;
+            return `<img src="/images/icons/${
+              materialIcons[type]
+            }" alt="Material ${type.toUpperCase()}" />`;
+          })
+          .join("");
+
+        // Determinando a div de status da tarefa
+        let statusDiv = "";
+        if (manual.task_status === true) {
+          statusDiv =
+            '<div class="statusConcluded" title="Tarefa concluída"> <img src="/images/icons/concludedManual.svg" alt="Tarefa concluída"> </div>';
+        } else if (manual.task_status === false) {
+          statusDiv =
+            '<div class="statusPending" title="Tarefa pendente"> <img src="/images/icons/ellipsis.svg" alt="Tarefa pendente"> </div>';
+        } else if (manual.task_status === null) {
+          statusDiv = ""; // Ou uma outra div indicando que a tarefa não foi atribuída, se necessário
+        }
+
+        // Exibir um indicativo que o manual foi favoritado caso ele tenha sido
+        let isfavorited = "";
+        if (manual.favorite_id) {
+          isfavorited = `<img
+          class="favoritedManual"
+          src="/images/icons/favorited.png"
+          alt="Íncone que indica que o manual foi favoritado"
+          title="Manual Favoritado"
+        />`;
+        }
+
+        // Traduzir para português o hardware type
+        let hardwareTypePT = "";
+
+        const hardwareTypeMap = {
+          laptop: "Notebook",
+          workstation: "Workstation",
+          storage: "Armazenamento",
+          server: "Servidor",
+          desktop: "Computador",
+          accessory: "Acessório",
+          monitor: "Monitor",
+        };
+
+        hardwareTypePT = hardwareTypeMap[manual.hardwareType] || "Outro";
+
+        // Usando a imagem genérica "empty.png" como fallback em caso de erro
+        return `
+        <div class="manualContainer" ${
+          sessionStorage.isEngineer === "true"
+            ? `onclick="window.location.href = '/engenheiro/editar-manual?id=${manual.manual_id}';"`
+            : `onclick="window.location.href = '/manual/${manual.manual_id}?user=${sessionStorage.id}';"`
+        }>
+            ${statusDiv}
+            ${isfavorited}
+            <div class="imageContainer ${manual.hardwareType}Background">
+                <img src="/images/productsTypes/${
+                  manual.hardwareType
+                }.png" alt="${title}"
+                    onerror="this.onerror=null;this.src='/images/productsTypes/empty.png';" />
+            </div>
+            <div class="contentContainer">
+                <div>
+                    <span>${hardwareTypePT}</span>
+                    <div class="materialTypesIcons">
+                        ${materialIconsHTML}
+                    </div>
+                </div>
+                <h4>${title}</h4>
+                <p>${description}</p>
+            </div>
+        </div>
+      `;
+      }
+
+      async function fetchManuals(
+        filters = [],
+        sortBy = "title",
+        page = 1,
+        search = ""
+      ) {
+        try {
+          cleanSearch = search.trim(); // Remove espaços em branco antes e depois do termo pesquisado
+
+          const response = await fetch("/api/findAllManuals", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              employeeId: sessionStorage.id,
+              filters,
+              sortBy,
+              page,
+              cleanSearch,
+            }),
+          });
+
+          const data = await response.json();
+
+          // Remove possíveis manuais duplicados:
+          const cleanedArray = removeDuplicates(data.rows);
+
+          // se for a primeira página e a quantidade de manuais for menor que 15, esconder botões de páginação, caso contrário, exibir
+          document.getElementById("pagesBtns").style.display =
+            page == 1 && cleanedArray.length < 15 ? "none" : "flex";
+
+          // se for a primeira página, esconder o botão de retroceder página
+          document.querySelector(
+            "div#pagesBtns>button:first-child"
+          ).style.visibility = page == 1 ? "hidden" : "visible";
+
+          // se for a última página, esconder o botão de avançar página
+          document.querySelector(
+            "div#pagesBtns>button:last-child"
+          ).style.visibility =
+            page > 1 && cleanedArray.length < 15 ? "hidden" : "visible";
+
+          const manualsList = document.getElementById("manualsList");
+
+          if (cleanedArray.length) {
+            manualsList.innerHTML = "";
+            manualsList.innerHTML = cleanedArray
+              .map(createManualContainer)
+              .join("");
+          } else {
+            manualsList.innerHTML = "<h4>Não há manuais</h4>";
+          }
+        } catch (error) {
+          console.error("Error fetching manuals:", error);
+        }
+      }
+
+      function getSelectedFilters() {
+        const selectedFilters = [];
+        if (document.getElementById("tasks").checked) {
+          selectedFilters.push("tasks");
+        }
+        if (document.getElementById("favorites").checked) {
+          selectedFilters.push("favorites");
+        }
+        if (document.getElementById("laptop").checked) {
+          selectedFilters.push("laptop");
+        }
+        if (document.getElementById("desktop").checked) {
+          selectedFilters.push("desktop");
+        }
+        if (document.getElementById("monitor").checked) {
+          selectedFilters.push("monitor");
+        }
+        if (document.getElementById("workstation").checked) {
+          selectedFilters.push("workstation");
+        }
+        if (document.getElementById("accessory").checked) {
+          selectedFilters.push("accessory");
+        }
+        if (document.getElementById("storage").checked) {
+          selectedFilters.push("storage");
+        }
+        if (document.getElementById("server").checked) {
+          selectedFilters.push("server");
+        }
+        return selectedFilters;
+      }
+
+      let currentPage = 1;
+
+      // Adicione event listeners para os botões de paginação
+      document.getElementById("backPage").addEventListener("click", () => {
+        const sortBy = document.getElementById("order").value;
+        const filters = getSelectedFilters();
+        currentPage--;
+        fetchManuals(filters, sortBy, currentPage);
+      });
+
+      document.getElementById("nextPage").addEventListener("click", () => {
+        currentPage++;
+        const sortBy = document.getElementById("order").value;
+        const filters = getSelectedFilters();
+        fetchManuals(filters, sortBy, currentPage);
+      });
+
+      // Pesquisa com enter
+      document
+        .getElementById("serchManuals")
+        .addEventListener("keypress", function (event) {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            const sortBy = document.getElementById("order").value;
+            const filters = getSelectedFilters();
+
+            currentPage = 1; // diz que a página atual é novamente a primeira para evitar que, caso o usuário tenha passado de página, nova filtragem busque com um offset diferente de
+
+            this.value
+              ? fetchManuals(filters, sortBy, currentPage, this.value)
+              : fetchManuals(filters, sortBy);
+          }
+        });
+
+      // Adiciona o ouvinte de eventos para o clique na imagem de pesquisa
+      document
+        .querySelector('main#allManuals img[alt="ícone de Pesquisa"]')
+        .addEventListener("click", function () {
+          const searchValue = document.getElementById("serchManuals").value;
+          const sortBy = document.getElementById("order").value;
+          const filters = getSelectedFilters();
+
+          currentPage = 1;
+
+          document.getElementById("serchManuals").value
+            ? fetchManuals(
+                filters,
+                sortBy,
+                currentPage,
+                document.getElementById("serchManuals").value
+              )
+            : fetchManuals(filters, sortBy);
+        });
+
+      // clique do botão de ordenação
+      document.getElementById("order").addEventListener("change", (event) => {
+        const sortBy = event.target.value;
+        const filters = getSelectedFilters();
+        fetchManuals(filters, sortBy);
+
+        currentPage = 1;
+      });
+
+      // cliques dos filtros
+      document.getElementById("dropFilters").addEventListener("change", () => {
+        const sortBy = document.getElementById("order").value;
+        const filters = getSelectedFilters();
+        fetchManuals(filters, sortBy);
+
+        currentPage = 1;
+      });
+
+      // cliques dos filtros de tipos de hardware
+      document
+        .querySelectorAll(
+          "main#allManuals #dropCategories input[type='checkbox']"
+        )
+        .forEach((checkbox) => {
+          checkbox.addEventListener("change", () => {
+            const sortBy = document.getElementById("order").value;
+            const filters = getSelectedFilters();
+            fetchManuals(filters, sortBy);
+          });
+        });
+
+      // Faz uma filtragem quando a tela é carregada porque em algumas views de manuais, o filtragem vem por padrão
+      const filters = getSelectedFilters();
+      fetchManuals(filters);
+    });
+  </script>
+</main>

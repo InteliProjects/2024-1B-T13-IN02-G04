@@ -1,0 +1,377 @@
+<main id="homepage">
+  <!-- Buscar o nome pela sessão armazenada-->
+  <h1>Olá, <span id="nameOnTitle">Pessoa</span>! Bom te ver por aqui</h1>
+
+  <!-- Seção para ver os manuais pendentes -->
+  <section id="tasks">
+    <div>
+      <h2>Tarefas</h2>
+      <h3>Aqui estão suas tarefas, conclua as leituras pendentes.</h3>
+    </div>
+
+    <div class="relativeToBtn">
+      <div class="carroussel">
+        <h4>Ainda não há tarefas designadas</h4>
+
+        <!--
+          Modelo de container de manual:
+          <div class="manualContainer">
+            <div class="statusPending" title="Tarefa pendente">
+              <img src="/images/icons/ellipsis.svg" alt="Tarefa pendente" />
+            </div>
+            <img
+              class="favoritedManual"
+              src="/images/icons/favorited.png"
+              alt="Íncone que indica que o manual foi favoritado"
+              title="Manual Favoritado"
+            />
+            <div class="imageContainer serverBackground">
+              <img
+                src="/images/productsTypes/server.png"
+                alt="Dell EMC PowerEdge ..."
+                onerror="this.onerror=null;this.src='/images/productsTypes/empty.png';"
+              />
+            </div>
+            <div class="contentContainer">
+              <div>
+                <span>Servidor</span>
+                <div class="materialTypesIcons">
+                  <img src="/images/icons/pdf.svg" alt="Material PDF" />
+                </div>
+              </div>
+              <h4>Dell EMC PowerEdge ...</h4>
+              <p>
+                Este guia de configuração do Dell EMC PowerEdge T640 fornece...
+              </p>
+            </div>
+          </div>
+        -->
+      </div>
+      <img
+        src="/images/icons/chevronLeft.svg"
+        alt="ícone de seta para esquerda"
+        class="backButton"
+      />
+      <img
+        src="/images/icons/chevronRight.svg"
+        alt="ícone de seta para direita"
+        class="nextButton"
+      />
+    </div>
+
+    <a href="/manuais/tarefas" id="pedenciesButton">Ver tarefas</a>
+  </section>
+
+  <!-- Seção para ver os manuais favoritados -->
+  <section id="favorites">
+    <h2>Favoritos</h2>
+
+    <div class="relativeToBtn">
+      <div class="carroussel">
+        <h4>Ainda não há manuais favoritados</h4>
+        <!-- Os manuais virão aqui -->
+      </div>
+      <img
+        src="/images/icons/chevronLeft.svg"
+        alt="ícone de seta para esquerda"
+        class="backButton"
+      />
+      <img
+        src="/images/icons/chevronRight.svg"
+        alt="ícone de seta para direita"
+        class="nextButton"
+      />
+    </div>
+  </section>
+
+  <!-- Seção para ver os manuais acessados por último -->
+  <section id="lastAccessed">
+    <h2>Acessados por último</h2>
+
+    <div class="relativeToBtn">
+      <div class="carroussel">
+        <h4>Ainda não há manuais acessados por último</h4>
+        <!-- Os manuais virão aqui -->
+      </div>
+      <img
+        src="/images/icons/chevronLeft.svg"
+        alt="ícone de seta para esquerda"
+        class="backButton"
+      />
+      <img
+        src="/images/icons/chevronRight.svg"
+        alt="ícone de seta para direita"
+        class="nextButton"
+      />
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      function checkAuthentication() {
+        if (!sessionStorage.length) {
+          window.location.href = "/entrar"; // Redirecionar para a tela de login
+        } else if (sessionStorage.isEngineer == "true") {
+          window.location.href = "/engenheiro"; // Redireciona para a homepage de adm, caso o usuário seja adm};
+        }
+      }
+
+      checkAuthentication();
+
+      // Função para verificar o overflow do carrossel
+      function checkOverflow(carroussel) {
+        const backButton =
+          carroussel.parentElement.querySelector(".backButton");
+        const nextButton =
+          carroussel.parentElement.querySelector(".nextButton");
+
+        if (carroussel.scrollWidth > carroussel.clientWidth) {
+          backButton.style.display = "block";
+          nextButton.style.display = "block";
+        } else {
+          backButton.style.display = "none";
+          nextButton.style.display = "none";
+        }
+      }
+
+      // Atualiza o conteúdo do span com o ID nameOnTitle
+      if (sessionStorage.length)
+        document.getElementById("nameOnTitle").textContent =
+          sessionStorage.getItem("firstName");
+
+      // Lógica para colocar os botôes de passar o carrosel:
+      const carrousels = document.querySelectorAll(".carroussel");
+
+      carrousels.forEach((carroussel) => {
+        const backButton =
+          carroussel.parentElement.querySelector(".backButton");
+        const nextButton =
+          carroussel.parentElement.querySelector(".nextButton");
+
+        function scrollCarroussel(direction) {
+          const scrollAmount = 400;
+          carroussel.scrollBy({
+            left: direction * scrollAmount,
+            behavior: "smooth",
+          });
+        }
+
+        backButton.addEventListener("click", () => scrollCarroussel(-1));
+        nextButton.addEventListener("click", () => scrollCarroussel(1));
+
+        // checa se o conteúdo ultrapassa o conteúdo do container pai
+        checkOverflow(carroussel);
+
+        // checa novamente se a janela for redimensionada
+        window.addEventListener("resize", () => checkOverflow(carroussel));
+      });
+
+      // Função para deixar a primeira letra maiúscula
+      function capitalizeFirstLetter(text) {
+        if (!text) return "";
+        return text.charAt(0).toUpperCase() + text.slice(1);
+      }
+
+      // Função para colocar reticências no fim do texto caso ele seja muito longo
+      function truncateText(text, maxLength) {
+        if (text.length > maxLength) {
+          return text.slice(0, maxLength) + "...";
+        }
+        return text;
+      }
+
+      // Função para criar o container do manual
+      function createManualContainer(manual) {
+        const maxTitleLength = 19;
+        const maxDescriptionLength = 65;
+
+        const title = capitalizeFirstLetter(
+          truncateText(manual.title, maxTitleLength)
+        );
+        const description = capitalizeFirstLetter(
+          truncateText(manual.description, maxDescriptionLength)
+        );
+
+        const materialTypes = manual.materialtypes
+          ? [...new Set(manual.materialtypes.split(", "))]
+          : [];
+
+        // Mapeando os tipos de materiais para suas imagens correspondentes
+        const materialIcons = {
+          "3d": "3d.svg",
+          stp: "3d.svg",
+          img: "img.svg",
+          png: "img.svg",
+          jpg: "img.svg",
+          pdf: "pdf.svg",
+          vid: "vid.svg",
+          mkv: "vid.svg",
+          mp4: "vid.svg",
+        };
+
+        // Gerando HTML para os ícones de materiais
+        const materialIconsHTML = materialTypes
+          .map((type) => {
+            if (!materialIcons[type]) return;
+            return `<img src="/images/icons/${
+              materialIcons[type]
+            }" alt="Material ${type.toUpperCase()}" />`;
+          })
+          .join("");
+
+        // Determinando a div de status da tarefa
+        let statusDiv = "";
+        if (manual.status === true) {
+          statusDiv =
+            '<div class="statusConcluded" title="Tarefa concluída"> <img src="/images/icons/concludedManual.svg" alt="Tarefa concluída"> </div>';
+        } else if (manual.status === false) {
+          statusDiv =
+            '<div class="statusPending" title="Tarefa pendente"> <img src="/images/icons/ellipsis.svg" alt="Tarefa pendente"> </div>';
+        } else if (manual.status === null) {
+          statusDiv = ""; // Ou uma outra div indicando que a tarefa não foi atribuída, se necessário
+        }
+
+        // Exibir um indicativo que o manual foi favoritado caso ele tenha sido
+        let isfavorited = "";
+        if (manual.isfavorited) {
+          isfavorited = `<img
+          class="favoritedManual"
+          src="/images/icons/favorited.png"
+          alt="Íncone que indica que o manual foi favoritado"
+          title="Manual Favoritado"
+        />`;
+        }
+
+        // Traduzir para português o hardware type
+        let hardwareTypePT = "";
+
+        const hardwareTypeMap = {
+          laptop: "Notebook",
+          workstation: "Workstation",
+          storage: "Armazenamento",
+          server: "Servidor",
+          desktop: "Computador",
+          accessory: "Acessório",
+          monitor: "Monitor",
+        };
+
+        hardwareTypePT = hardwareTypeMap[manual.hardwareType] || "Outro";
+
+        // Usando a imagem genérica "empty.png" como fallback em caso de erro
+        return `
+        <div class="manualContainer" onclick="window.location.href = '/manual/${manual.id}?user=${sessionStorage.id}';">
+            ${statusDiv}
+            ${isfavorited}
+            <div class="imageContainer ${manual.hardwareType}Background">
+                <img src="/images/productsTypes/${manual.hardwareType}.png" alt="${title}"
+                    onerror="this.onerror=null;this.src='/images/productsTypes/empty.png';" />
+            </div>
+            <div class="contentContainer">
+                <div>
+                    <span>${hardwareTypePT}</span>
+                    <div class="materialTypesIcons">
+                        ${materialIconsHTML}
+                    </div>
+                </div>
+                <h4>${title}</h4>
+                <p>${description}</p>
+            </div>
+        </div>
+      `;
+      }
+
+      // Função para buscar e renderizar manuais pendentes
+      async function fetchTasks() {
+        try {
+          const response = await fetch("/api/home/tasks", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              employeeId: sessionStorage.id,
+            }),
+          });
+
+          const data = await response.json();
+          const tasksSection = document.querySelector("#tasks .carroussel");
+
+          if (data.rows.length) {
+            tasksSection.innerHTML = data.rows
+              .map(createManualContainer)
+              .join("");
+          }
+
+          // Checa overflow após a inserção dos elementos
+          checkOverflow(tasksSection);
+        } catch (error) {
+          console.error("Error fetching tasks:", error);
+        }
+      }
+
+      // Função para buscar e renderizar manuais favoritados
+      async function fetchFavorites() {
+        try {
+          const response = await fetch("/api/home/favorites", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              employeeId: sessionStorage.id,
+            }),
+          });
+          const data = await response.json();
+          const favoritesSection = document.querySelector(
+            "#favorites .carroussel"
+          );
+
+          if (data.rows.length) {
+            favoritesSection.innerHTML = data.rows
+              .map(createManualContainer)
+              .join("");
+          }
+
+          // Checa overflow após a inserção dos elementos
+          checkOverflow(favoritesSection);
+        } catch (error) {
+          console.error("Error fetching favorites:", error);
+        }
+      }
+
+      // Função para buscar e renderizar os últimos manuais acessados
+      async function fetchLastAccessed() {
+        try {
+          const response = await fetch("/api/home/lastAccessed", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              employeeId: sessionStorage.id,
+            }),
+          });
+          const data = await response.json();
+          const lastAccessedSection = document.querySelector(
+            "#lastAccessed .carroussel"
+          );
+
+          if (data.rows.length) {
+            lastAccessedSection.innerHTML = data.rows
+              .map(createManualContainer)
+              .join("");
+          }
+
+          // Checa overflow após a inserção dos elementos
+          checkOverflow(lastAccessedSection);
+        } catch (error) {
+          console.error("Error fetching last accessed:", error);
+        }
+      }
+
+      fetchTasks();
+      fetchFavorites();
+      fetchLastAccessed();
+    });
+  </script>
+</main>

@@ -1,0 +1,147 @@
+main#homepageAdmin {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+#graficoLinhas {
+  width: 100%;
+  margin-top: 20px;
+}
+
+#legendaPendente {
+  width: 15%;
+}
+
+#legendaFeito {
+  width: 15%;
+}
+
+main#homepageAdmin #dashboard {
+  flex-direction: row;
+}
+
+main#homepageAdmin #dashboard>div:last-child {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+main#homepageAdmin #dashboard>div:last-child div.chart-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+main#homepageAdmin section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 28px 60px;
+  position: relative;
+  gap: 20px;
+}
+
+main#homepageAdmin button {
+  align-self: flex-end;
+  background-color: #0672CB;
+  color: #fff;
+  width: 200px;
+  height: 35px;
+  bottom: 10px;
+  right: 10px;
+  margin-top: 30px;
+  transition: .25s ease;
+}
+
+main#homepageAdmin button:hover {
+  box-shadow: 0 0 5px #0672CB;
+  transform: scaleX(1.02)
+}
+
+main#homepageAdmin #addManual {
+  align-self: flex-end;
+  background-color: #0672CB;
+  color: #fff;
+  margin: 10px;
+  width: 200px;
+  height: 35px;
+  bottom: 10px;
+  right: 10px;
+}
+
+// para posicionar os botões
+// Botões para passar carrossel:
+div.relativeToBtn {
+  position: relative;
+  width: 100%;
+}
+
+main#homepageAdmin img.backButton,
+main#homepageAdmin img.nextButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 30px;
+  height: 50px;
+  transition: .25s;
+  display: none;
+}
+
+main#homepageAdmin img.backButton:hover,
+main#homepageAdmin img.nextButton:hover {
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.505));
+}
+
+main#homepageAdmin img.backButton {
+  left: -40px;
+}
+
+main#homepageAdmin img.nextButton {
+  right: -40px;
+}
+
+
+main#homepageAdmin>#manuaisAdmin {
+  background-color: #f0f0f0;
+}
+
+main#homepageAdmin>#manuaisAdmin h3 {
+  margin: 10px;
+}
+
+main#homepageAdmin .StatusTarefas {
+  width: 40%;
+}
+
+main#homepageAdmin .StatusLinhaMontagem {
+  width: 60%;
+}
+
+main#homepageAdmin .chart-container {
+  width: 100%;
+  position: relative;
+  /* Torna o contêiner de gráfico relativo */
+  margin: 1em;
+}
+
+main#homepageAdmin canvas#taskChart {
+  width: 100%;
+  /* Defina a largura desejada */
+  max-height: 300px;
+  /* Permita que a altura seja ajustada automaticamente */
+  max-width: 300px;
+  /* Defina a largura máxima */
+}
+
+main#homepageAdmin .chartjs-render-monitor {
+  /* Seletor específico do Chart.js para a legenda */
+  position: absolute;
+  bottom: 10px;
+  /* Ajuste a distância da legenda em relação à parte inferior */
+  left: 0;
+}

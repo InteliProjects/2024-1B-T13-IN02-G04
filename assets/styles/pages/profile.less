@@ -1,0 +1,206 @@
+main#profile {
+    min-height: 650px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+main#profile>h1 {
+    margin: 50px 0;
+}
+
+main#profile>form#actualData {
+    // Container do formulário
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    width: 570px;
+    margin-bottom: 50px;
+}
+
+main#profile>form#actualData>div {
+    display: flex;
+    flex-direction: column;
+}
+
+main#profile form input {
+    // seleciona todos os campos de entrada de dados
+    width: 100%;
+    height: 50px;
+    color: #000;
+    line-height: 36px;
+    font-weight: 300;
+    font-size: 24px;
+    padding-left: 50px;
+    padding-right: 10px;
+}
+
+main#profile>form#actualData input {
+    // seleciona campos que não podem ser alterados
+    cursor: not-allowed;
+}
+
+main#profile>form#actualData input:hover {
+    // seleciona campos que não podem ser alterados
+    border: 1px solid #767676;
+}
+
+// Campo com ícone:
+main#profile form div.inputAndIcon {
+    width: 100%;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+}
+
+main#profile form div.inputAndIcon img {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    pointer-events: none;
+}
+
+main#profile form#actualData>div:nth-of-type(3) {
+    display: flex;
+    flex-direction: column;
+}
+
+// div dos botôes
+main#profile form#actualData>div:last-child {
+    align-self: flex-end;
+    display: flex;
+    justify-content: flex-end;
+    flex-direction: row;
+}
+
+main#profile form#newPasswordForm>button[type='submit'],
+main#profile>form#actualData>div:last-child>button {
+    height: 50px;
+    width: 190px;
+    font-weight: 500;
+    font-size: 20px;
+    transition: .25s ease;
+}
+
+main#profile form#newPasswordForm>button[type='submit']:hover,
+main#profile>form#actualData>div:last-child>button:hover {
+    box-shadow: 0 0 6px #0672cb9e;
+    text-decoration-line: underline;
+    text-decoration-color: #FFF;
+    text-decoration-thickness: 2px;
+}
+
+main#profile>form#actualData>div:last-child>button:first-child {
+    color: #0672cb;
+    border: 1px solid #0672cb;
+}
+
+main#profile>form#actualData>div:last-child>button:first-child:hover {
+    text-decoration-color: #0672cb;
+}
+
+main#profile form#newPasswordForm>button[type='submit'],
+main#profile>form#actualData>div:last-child>button:last-child {
+    color: #fff;
+    background-color: #0672cb;
+    margin-left: 40px;
+}
+
+// -------------- Formulário para alterar a senha --------------
+div.modalBackground {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #0000006d;
+    display: none;
+}
+
+main#profile>div.modalBackground>form#newPasswordForm {
+    background-color: #fff;
+    padding: 32px 48px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+}
+
+main#profile>div.modalBackground>form#newPasswordForm>div:last-of-type {
+    width: 100%;
+}
+
+main#profile>div.modalBackground>form#newPasswordForm>button:first-child {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    top: 24px;
+    right: 24px;
+}
+
+main#profile>div.modalBackground>form#newPasswordForm>button:first-child>img {
+    width: 24px;
+    height: 24px;
+    transition: .25s ease;
+}
+
+main#profile>div.modalBackground>form#newPasswordForm>button:first-child>img:hover {
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.318));
+}
+
+main#profile div.modalBackground form#newPasswordForm p {
+    // Helper text do campo de senha
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    color: #7E7E7E;
+}
+
+main#profile form#newPasswordForm input {
+    margin: 3px 0;
+}
+
+main#profile form#actualData>div:nth-of-type(3)>div:first-child,
+main#profile form#newPasswordForm>div>div:first-child {
+    // Seleciona a div com a label e o botão de mostrar senha
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+main#profile>form#actualData>div:nth-of-type(3)>div:first-child>button,
+main#profile form#newPasswordForm>div>div:first-child>button {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 24px;
+    color: #0672CB;
+}
+
+main#profile>form#actualData>div:nth-of-type(3)>div:first-child>button:hover,
+main#profile form#newPasswordForm>div>div:first-child>button:hover {
+    font-weight: 500;
+}
+
+// Botão para salvar alterações
+main#profile form#newPasswordForm>button[type='submit'] {
+    margin-left: 0;
+    align-self: flex-end;
+}
+
+// Estilos para o helper text com feedback
+p.textSuccess {
+    color: #9BC438 !important;
+}
+
+p.textDanger {
+    color: #E4424D !important;
+}
